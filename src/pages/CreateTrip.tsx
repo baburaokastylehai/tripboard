@@ -40,6 +40,7 @@ const CreateTrip = () => {
       <div className="w-full max-w-[480px] px-5 pt-6 pb-10">
         {/* Back */}
         <button
+          type="button"
           onClick={() => navigate('/')}
           className="font-body text-[13px] font-medium text-copper mb-8 active:opacity-70"
         >
