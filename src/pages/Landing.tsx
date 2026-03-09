@@ -41,6 +41,7 @@ const Landing = () => {
         {/* Buttons */}
         <div className="w-full flex flex-col gap-3">
           <button
+            type="button"
             onClick={() => navigate('/new')}
             className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80"
             style={{ backgroundColor: '#1a3647', color: '#faf7f2' }}
@@ -48,6 +49,7 @@ const Landing = () => {
             Create a Trip
           </button>
           <button
+            type="button"
             onClick={() => setShowLinkHelper(!showLinkHelper)}
             className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold text-navy transition-opacity active:opacity-80"
             style={{ border: '1.5px solid rgba(26,54,71,0.15)', backgroundColor: 'transparent' }}

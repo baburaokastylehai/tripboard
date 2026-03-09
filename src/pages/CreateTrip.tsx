@@ -40,6 +40,7 @@ const CreateTrip = () => {
       <div className="w-full max-w-[480px] px-5 pt-6 pb-10">
         {/* Back */}
         <button
+          type="button"
           onClick={() => navigate('/')}
           className="font-body text-[13px] font-medium text-copper mb-8 active:opacity-70"
         >
@@ -109,6 +110,7 @@ const CreateTrip = () => {
         </div>
 
         <button
+          type="button"
           onClick={handleCreate}
           disabled={!name.trim() || submitting}
           className="w-full mt-6 py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80 disabled:cursor-not-allowed"
