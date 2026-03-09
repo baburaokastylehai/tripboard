@@ -31,6 +31,10 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    touch-action: manipulation;
   }
   body {
     font-family: 'DM Sans', sans-serif;
@@ -38,6 +42,10 @@
     color: #1a3647;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  button, a, [role="button"] {
+    cursor: pointer;
+    touch-action: manipulation;
   }
   /* Hide scrollbars */
   ::-webkit-scrollbar {
