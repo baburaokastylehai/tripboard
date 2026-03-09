@@ -34,7 +34,7 @@ const Landing = () => {
           <div className="text-[60px] leading-none mb-4">🗺</div>
           <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight">TripBoard</h1>
           <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed">
-            Plan trips together. One link, everyone adds.
+            Your crew, one board, zero hassle.
           </p>
         </div>
 
