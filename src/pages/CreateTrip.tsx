@@ -110,6 +110,7 @@ const CreateTrip = () => {
         </div>
 
         <button
+          type="button"
           onClick={handleCreate}
           disabled={!name.trim() || submitting}
           className="w-full mt-6 py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80 disabled:cursor-not-allowed"
