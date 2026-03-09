@@ -132,7 +132,16 @@ const TripBoard = () => {
         </div>
       </div>
     );
-  }
+          }
+        >
+          {/* Back to home */}
+          <button
+            onClick={() => navigate('/')}
+            className="absolute font-body text-[13px] font-medium active:opacity-60"
+            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.55)' }}
+          >
+            ← Home
+          </button
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#faf7f2' }}>
