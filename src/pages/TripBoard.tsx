@@ -132,16 +132,7 @@ const TripBoard = () => {
         </div>
       </div>
     );
-          }
-        >
-          {/* Back to home */}
-          <button
-            onClick={() => navigate('/')}
-            className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.55)' }}
-          >
-            ← Home
-          </button
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#faf7f2' }}>
@@ -163,6 +154,14 @@ const TripBoard = () => {
             padding: '52px 20px 28px',
           }}
         >
+          {/* Back to home */}
+          <button
+            onClick={() => navigate('/')}
+            className="absolute font-body text-[13px] font-medium active:opacity-60"
+            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.55)' }}
+          >
+            ← Home
+          </button>
           {/* Decorative emoji */}
           <div
             className="absolute select-none pointer-events-none"
