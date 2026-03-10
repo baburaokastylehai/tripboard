@@ -168,9 +168,9 @@ const TripBoard = () => {
           <button
             onClick={() => navigate('/')}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.55)' }}
+            style={{ top: '20px', left: '20px', color: '#c17c4e' }}
           >
-            ← Home
+            ← TripBoard
           </button>
           {/* Decorative emoji */}
           <div
