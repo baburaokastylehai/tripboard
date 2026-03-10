@@ -126,6 +126,7 @@ const Landing = () => {
           <p className="font-body text-[12px] text-text-muted text-center mt-1">
             Or just open a shared trip link — it'll take you straight there.
           </p>
+        </div>
 
         {/* My Trips */}
         {myTrips.length > 0 && (
