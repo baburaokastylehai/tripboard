@@ -14,16 +14,27 @@ const Landing = () => {
   const [showLinkHelper, setShowLinkHelper] = useState(false);
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
 
-  useEffect(() => {
+  const loadTrips = () => {
     try {
       const saved = localStorage.getItem('tripboard-my-trips');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setMyTrips(parsed);
         }
       }
     } catch {}
+  };
+
+  useEffect(() => {
+    loadTrips();
+    const handleFocus = () => loadTrips();
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('pageshow', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('pageshow', handleFocus);
+    };
   }, []);
 
   return (
