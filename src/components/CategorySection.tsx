@@ -53,28 +53,41 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
           style={{
             backgroundColor: 'rgba(255,255,255,0.5)',
             borderRadius: '0 0 16px 16px',
-            padding: '12px 12px 4px',
+            padding: '12px 0 4px',
             borderLeft: '1px solid rgba(26,54,71,0.06)',
             borderRight: '1px solid rgba(26,54,71,0.06)',
             borderBottom: '1px solid rgba(26,54,71,0.06)',
           }}
         >
-          {items.map((item) => (
-            <ItemCard key={item.id} item={item} onDelete={() => onDeleteItem(item.id)} />
-          ))}
-
-          {/* Add item button */}
-          <button
-            onClick={onAddItem}
-            className="w-full py-3 mb-2 font-body text-[14px] font-medium text-copper active:opacity-70"
+          {/* Horizontal scroll area */}
+          <div
+            className="flex gap-3 overflow-x-auto pb-3 px-3"
             style={{
-              border: '2px dashed rgba(26,54,71,0.1)',
-              borderRadius: '12px',
-              backgroundColor: 'transparent',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
-            + Add item
-          </button>
+            {items.map((item) => (
+              <ItemCard key={item.id} item={item} onDelete={() => onDeleteItem(item.id)} />
+            ))}
+
+            {/* Add item card */}
+            <button
+              onClick={onAddItem}
+              className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper active:opacity-70"
+              style={{
+                width: '148px',
+                height: '148px',
+                border: '2px dashed rgba(26,54,71,0.1)',
+                borderRadius: '16px',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <span className="text-[24px] mb-1 opacity-40">+</span>
+              Add item
+            </button>
+          </div>
         </div>
       )}
     </div>
