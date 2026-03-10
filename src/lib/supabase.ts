@@ -30,9 +30,9 @@ export interface TripItem {
 
 export const CATEGORIES = [
   { id: 'stay', emoji: '🏠', name: 'Stay', subtitle: 'Vrbo & Accommodation' },
-  { id: 'getting-there', emoji: '⛴', name: 'Getting There', subtitle: 'Ferry, Flights & Transit' },
+  { id: 'transport', emoji: '⛴', name: 'Getting There', subtitle: 'Ferry, Flights & Transit' },
   { id: 'activities', emoji: '🤿', name: 'Activities', subtitle: 'Scuba, Tours & Adventures' },
-  { id: 'eat-drink', emoji: '🍽', name: 'Eat & Drink', subtitle: 'Restaurants & Bars' },
+  { id: 'food', emoji: '🍽', name: 'Eat & Drink', subtitle: 'Restaurants & Bars' },
   { id: 'explore', emoji: '📍', name: 'Explore', subtitle: 'Things to See & Do' },
 ] as const;
 
