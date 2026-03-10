@@ -11,9 +11,17 @@ interface SavedTrip {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [showLinkHelper, setShowLinkHelper] = useState(false);
+  const [tripLink, setTripLink] = useState('');
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
+
+  const handleGoToTrip = () => {
+    const trimmed = tripLink.trim();
+    if (!trimmed) return;
+    const match = trimmed.match(/\/t\/([^/?#]+)/);
+    const slug = match ? match[1] : trimmed;
+    navigate(`/t/${slug}`);
+  };
 
   const loadTrips = () => {
     try {
