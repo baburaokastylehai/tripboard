@@ -42,11 +42,12 @@ const TripBoard = () => {
   }, [slug]);
 
   const fetchItems = useCallback(async (tripId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('trip_items')
       .select('*')
       .eq('trip_id', tripId)
       .order('created_at', { ascending: false });
+    if (error) console.error('Fetch items failed:', error);
     if (data) setItems(data);
   }, []);
 
