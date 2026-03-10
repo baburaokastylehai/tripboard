@@ -61,7 +61,8 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
     // Optimistic
     onItemAdded(newItem);
 
-    await supabase.from('trip_items').insert(newItem);
+    const { error } = await supabase.from('trip_items').insert(newItem);
+    if (error) console.error('Insert failed:', error);
     setSubmitting(false);
   };
 

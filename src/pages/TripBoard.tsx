@@ -36,6 +36,7 @@ const TripBoard = () => {
       .select('*')
       .eq('slug', slug)
       .single();
+    if (error) console.error('Fetch trip failed:', error);
     if (error || !data) { setNotFound(true); setLoading(false); return; }
     setTrip(data);
     return data;
