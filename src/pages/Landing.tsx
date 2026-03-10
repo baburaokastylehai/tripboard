@@ -11,9 +11,17 @@ interface SavedTrip {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [showLinkHelper, setShowLinkHelper] = useState(false);
+  const [tripLink, setTripLink] = useState('');
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
+
+  const handleGoToTrip = () => {
+    const trimmed = tripLink.trim();
+    if (!trimmed) return;
+    const match = trimmed.match(/\/t\/([^/?#]+)/);
+    const slug = match ? match[1] : trimmed;
+    navigate(`/t/${slug}`);
+  };
 
   const loadTrips = () => {
     try {
@@ -92,19 +100,32 @@ const Landing = () => {
           >
             Create a Trip
           </button>
-          <button
-            type="button"
-            onClick={() => setShowLinkHelper(!showLinkHelper)}
-            className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold text-navy transition-opacity active:opacity-80"
-            style={{ border: '1.5px solid rgba(26,54,71,0.15)', backgroundColor: 'transparent' }}
-          >
-            I have a trip link
-          </button>
-          {showLinkHelper && (
-            <p className="font-body text-[13px] text-text-muted text-center animate-fadeSlideIn">
-              Just open the link shared with you — it'll take you straight to the trip.
-            </p>
-          )}
+          <div className="w-full flex gap-2">
+            <input
+              type="text"
+              placeholder="Paste trip link or slug"
+              value={tripLink}
+              onChange={(e) => setTripLink(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGoToTrip()}
+              className="flex-1 px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none transition-colors"
+              style={{
+                border: '1.5px solid rgba(26,54,71,0.12)',
+                backgroundColor: '#fff',
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleGoToTrip}
+              disabled={!tripLink.trim()}
+              className="px-5 py-[14px] rounded-xl font-body text-[14px] font-semibold transition-opacity active:opacity-80 disabled:opacity-40"
+              style={{ backgroundColor: '#c17c4e', color: '#fff' }}
+            >
+              Go
+            </button>
+          </div>
+          <p className="font-body text-[12px] text-text-muted text-center mt-1">
+            Or just open a shared trip link — it'll take you straight there.
+          </p>
         </div>
 
         {/* My Trips */}
