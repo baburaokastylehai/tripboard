@@ -103,7 +103,7 @@ const Landing = () => {
           <div className="w-full flex gap-2">
             <input
               type="text"
-              placeholder="Paste trip link or slug"
+              placeholder="Paste your trip link here"
               value={tripLink}
               onChange={(e) => setTripLink(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleGoToTrip()}
