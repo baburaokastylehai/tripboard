@@ -57,6 +57,14 @@ const TripBoard = () => {
       const tripData = await fetchTrip();
       if (tripData) {
         await fetchItems(tripData.id);
+        // Save to visited trips
+        try {
+          const visited = JSON.parse(localStorage.getItem('tripboard-visited-trips') || '[]');
+          const entry = { id: tripData.id, slug: tripData.slug, name: tripData.name, emoji: tripData.emoji, subtitle: tripData.subtitle };
+          const idx = visited.findIndex((t: any) => t.id === tripData.id);
+          if (idx >= 0) visited[idx] = entry; else visited.unshift(entry);
+          localStorage.setItem('tripboard-visited-trips', JSON.stringify(visited));
+        } catch {}
         const hasName = localStorage.getItem('tripboard-username');
         if (!hasName) setShowWelcome(true);
       }
@@ -160,9 +168,9 @@ const TripBoard = () => {
           <button
             onClick={() => navigate('/')}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.55)' }}
+            style={{ top: '20px', left: '20px', color: '#c17c4e' }}
           >
-            ← Home
+            ← TripBoard
           </button>
           {/* Decorative emoji */}
           <div
