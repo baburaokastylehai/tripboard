@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase, Trip, EMOJI_OPTIONS } from '@/lib/supabase';
+import TripDatePicker from '@/components/TripDatePicker';
 
 interface Props {
   trip: Trip;
