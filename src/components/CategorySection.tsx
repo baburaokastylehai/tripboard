@@ -14,11 +14,11 @@ interface Props {
   collapsed: boolean;
   onToggle: () => void;
   onAddItem: () => void;
-  onDeleteItem: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
+  onItemTap: (item: TripItem) => void;
 }
 
-const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem, onStatusChange }: Props) => {
+const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onStatusChange, onItemTap }: Props) => {
   const isEmpty = items.length === 0;
   const bookedCount = items.filter(i => i.status === 'booked').length;
 
@@ -91,8 +91,8 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
               <ItemCard
                 key={item.id}
                 item={item}
-                onDelete={() => onDeleteItem(item.id)}
                 onStatusChange={onStatusChange}
+                onTap={onItemTap}
               />
             ))}
 

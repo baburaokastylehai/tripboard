@@ -2,8 +2,8 @@ import { TripItem } from '@/lib/supabase';
 
 interface Props {
   item: TripItem;
-  onDelete: () => void;
   onStatusChange: (id: string, status: string) => void;
+  onTap: (item: TripItem) => void;
 }
 
 const extractHostname = (url: string) => {
@@ -20,7 +20,7 @@ const formatItemDate = (dateStr: string) => {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
+const ItemCard = ({ item, onStatusChange, onTap }: Props) => {
   const isBooked = item.status === 'booked';
 
   const handleToggleStatus = (e: React.MouseEvent) => {
@@ -29,9 +29,20 @@ const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
     onStatusChange(item.id, newStatus);
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open detail sheet if clicking the link pill or status toggle
+    // Those have their own stopPropagation
+    onTap(item);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div
-      className="relative flex-shrink-0 animate-fadeSlideIn flex flex-col justify-between"
+      onClick={handleCardClick}
+      className="relative flex-shrink-0 animate-fadeSlideIn flex flex-col justify-between cursor-pointer active:opacity-80"
       style={{
         width: '148px',
         height: '148px',
@@ -41,17 +52,9 @@ const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
         boxShadow: '0 1px 4px rgba(26,54,71,0.07)',
         border: '1px solid rgba(26,54,71,0.06)',
         borderLeft: isBooked ? '3px solid #5cbf8a' : '1px solid rgba(26,54,71,0.06)',
+        transition: 'opacity 0.1s',
       }}
     >
-      {/* Delete */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-        className="absolute top-2 right-2 w-[22px] h-[22px] flex items-center justify-center rounded-full text-[12px] leading-none active:opacity-50"
-        style={{ color: '#b0bec5', backgroundColor: 'rgba(26,54,71,0.04)' }}
-      >
-        ×
-      </button>
-
       {/* Top: title */}
       <div className="min-w-0">
         <div className="font-body text-[13px] font-semibold text-navy leading-snug line-clamp-2">
@@ -66,6 +69,7 @@ const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleLinkClick}
             className="font-body text-[11px] text-copper truncate block active:opacity-70"
             style={{ textDecoration: 'none' }}
           >

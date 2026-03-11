@@ -8,6 +8,7 @@ import DaySection from '@/components/DaySection';
 import AddItemSheet from '@/components/AddItemSheet';
 import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
+import ItemDetailSheet from '@/components/ItemDetailSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const formatDateRange = (start: string, end: string) => {
@@ -61,6 +62,7 @@ const TripBoard = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastToggleTime, setLastToggleTime] = useState(0);
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
+  const [detailItem, setDetailItem] = useState<TripItem | null>(null);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
@@ -452,8 +454,8 @@ const TripBoard = () => {
                 collapsed={collapsed[cat.id] || false}
                 onToggle={() => setCollapsed(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
                 onAddItem={() => { setAddingCategory(cat.id); setAddingDate(null); }}
-                onDeleteItem={handleDeleteItem}
                 onStatusChange={handleStatusChange}
+                onItemTap={(item) => setDetailItem(item)}
               />
             ))}
           </div>
@@ -467,8 +469,8 @@ const TripBoard = () => {
                 key={section.key}
                 label={section.label}
                 items={section.items}
-                onDeleteItem={handleDeleteItem}
                 onStatusChange={handleStatusChange}
+                onItemTap={(item) => setDetailItem(item)}
                 onAddItem={section.date ? () => handleAddItemForDay(section.date!) : undefined}
                 emptyHint={section.date ? 'nothing planned yet' : undefined}
               />
@@ -542,6 +544,27 @@ const TripBoard = () => {
         <FeedbackOverlay
           tripSlug={slug}
           onClose={() => setShowFeedback(false)}
+        />
+      )}
+
+      {detailItem && (
+        <ItemDetailSheet
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+          onStatusChange={(id, status) => {
+            handleStatusChange(id, status);
+            setDetailItem(prev => prev ? { ...prev, status } : null);
+          }}
+          onDelete={(id) => {
+            handleDeleteItem(id);
+            setDetailItem(null);
+          }}
+          onItemUpdated={(updated) => {
+            setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
+            setDetailItem(updated);
+          }}
+          tripStartDate={trip.start_date}
+          tripEndDate={trip.end_date}
         />
       )}
     </div>
