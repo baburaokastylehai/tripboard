@@ -87,14 +87,29 @@ const TripBoard = () => {
     return data;
   }, [slug]);
 
-  const fetchItems = useCallback(async (tripId: string) => {
+  const fetchItems = useCallback(async (tripId: string, isPolling = false) => {
     const { data, error } = await supabase
       .from('trip_items')
       .select('*')
       .eq('trip_id', tripId)
       .order('created_at', { ascending: false });
     if (error) console.error('Fetch items failed:', error);
-    if (data) setItems(data);
+    if (data) {
+      if (isPolling) {
+        // Merge: preserve local status changes made in last 15 seconds
+        const now = Date.now();
+        const merged = data.map(item => {
+          const recent = recentStatusChanges.current[item.id];
+          if (recent && now - recent.time < 15000) {
+            return { ...item, status: recent.status };
+          }
+          return item;
+        });
+        setItems(merged);
+      } else {
+        setItems(data);
+      }
+    }
   }, []);
 
   useEffect(() => {
