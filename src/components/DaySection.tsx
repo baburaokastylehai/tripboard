@@ -4,13 +4,13 @@ import ItemCard from '@/components/ItemCard';
 interface Props {
   label: string;
   items: TripItem[];
-  onDeleteItem: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
+  onItemTap: (item: TripItem) => void;
   onAddItem?: () => void;
   emptyHint?: string;
 }
 
-const DaySection = ({ label, items, onDeleteItem, onStatusChange, onAddItem, emptyHint }: Props) => {
+const DaySection = ({ label, items, onStatusChange, onItemTap, onAddItem, emptyHint }: Props) => {
   const isEmpty = items.length === 0;
   const bookedCount = items.filter(i => i.status === 'booked').length;
 
