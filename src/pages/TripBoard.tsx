@@ -60,7 +60,7 @@ const TripBoard = () => {
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const pollingIntervalRef = useRef<ReturnType<typeof window.setInterval> | null>(null);
+  const pollingIntervalRef = useRef<number | null>(null);
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
   const [detailItem, setDetailItem] = useState<TripItem | null>(null);
 
