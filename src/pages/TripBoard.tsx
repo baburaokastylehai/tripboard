@@ -77,9 +77,13 @@ const TripBoard = () => {
 
   useEffect(() => {
     if (!trip) return;
-    const interval = setInterval(() => fetchItems(trip.id), 10000);
+    const interval = setInterval(() => {
+      if (Date.now() - lastToggleTime > 5000) {
+        fetchItems(trip.id);
+      }
+    }, 10000);
     return () => clearInterval(interval);
-  }, [trip, fetchItems]);
+  }, [trip, fetchItems, lastToggleTime]);
 
   const handleToggleAll = () => {
     const next = !allCollapsed;
