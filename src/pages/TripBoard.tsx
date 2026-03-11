@@ -94,6 +94,12 @@ const TripBoard = () => {
     await supabase.from('trip_items').delete().eq('id', itemId);
   };
 
+  const handleStatusChange = async (itemId: string, status: string) => {
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, status } : i));
+    const { error } = await supabase.from('trip_items').update({ status }).eq('id', itemId);
+    if (error) console.error('Status update failed:', error);
+  };
+
   const handleClearAll = async () => {
     if (!trip) return;
     if (!window.confirm("Clear all items? This can't be undone.")) return;
