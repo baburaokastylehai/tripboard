@@ -418,7 +418,7 @@ const TripBoard = () => {
             <h1 className="font-display text-[34px] font-extrabold leading-[1.1]" style={{ color: '#fff' }}>
               {trip.name}
             </h1>
-            {isCreator() && (
+            {(
               <button
                 onClick={() => setShowEdit(true)}
                 className="active:opacity-60 mt-1"
