@@ -301,17 +301,22 @@ const TripBoard = () => {
         )}
 
         {/* Footer */}
-        <div className="text-center pt-7 pb-4 flex items-center justify-center gap-2">
-          <span className="font-body text-[11px] tracking-[1px]" style={{ color: '#c8cfd3' }}>
+        <div className="text-center pt-7 pb-4 flex flex-col items-center gap-2">
+          <a
+            href="https://fortheplot.today"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-body text-[11px] tracking-[1px] active:opacity-100 tap-scale"
+            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7 }}
+          >
             fortheplot.today
-          </span>
-          <span className="font-body text-[11px]" style={{ color: '#c8cfd3' }}>·</span>
+          </a>
           <button
             onClick={() => setShowFeedback(true)}
-            className="active:opacity-60"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', fontSize: '13px' }}
+            className="font-body text-[11px] tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
           >
-            ✦
+            got thoughts? ✦
           </button>
         </div>
       </div>
