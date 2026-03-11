@@ -182,6 +182,13 @@ const Landing = () => {
 
         {/* Footer */}
         <div className="pt-10 pb-4 flex flex-col items-center gap-2">
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="font-body text-[11px] tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
+          >
+            the story behind this ✦ share your thoughts
+          </button>
           <a
             href="https://fortheplot.today"
             target="_blank"
@@ -191,13 +198,6 @@ const Landing = () => {
           >
             fortheplot.today
           </a>
-          <button
-            onClick={() => setShowFeedback(true)}
-            className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
-          >
-            the story behind this ✦ share your thoughts
-          </button>
         </div>
       </div>
 
