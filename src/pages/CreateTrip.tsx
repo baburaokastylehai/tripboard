@@ -38,7 +38,7 @@ const CreateTrip = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center" style={{ backgroundColor: '#faf7f2' }}>
+    <div className="min-h-screen flex justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
       <div className="w-full max-w-[480px] px-5 pt-6 pb-10">
         {/* Back */}
         <button
