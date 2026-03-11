@@ -7,6 +7,7 @@ import CategorySection from '@/components/CategorySection';
 import AddItemSheet from '@/components/AddItemSheet';
 import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
+import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const TripBoard = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -21,6 +22,7 @@ const TripBoard = () => {
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
@@ -58,7 +60,6 @@ const TripBoard = () => {
       const tripData = await fetchTrip();
       if (tripData) {
         await fetchItems(tripData.id);
-        // Save to visited trips
         try {
           const visited = JSON.parse(localStorage.getItem('tripboard-visited-trips') || '[]');
           const entry = { id: tripData.id, slug: tripData.slug, name: tripData.name, emoji: tripData.emoji, subtitle: tripData.subtitle };
@@ -74,7 +75,6 @@ const TripBoard = () => {
     init();
   }, [fetchTrip, fetchItems]);
 
-  // Poll for updates
   useEffect(() => {
     if (!trip) return;
     const interval = setInterval(() => fetchItems(trip.id), 10000);
@@ -109,7 +109,6 @@ const TripBoard = () => {
 
   const handleTripUpdated = (updated: Trip) => {
     setTrip(updated);
-    // Update localStorage
     try {
       const saved = JSON.parse(localStorage.getItem('tripboard-my-trips') || '[]');
       const idx = saved.findIndex((t: any) => t.id === updated.id);
@@ -120,12 +119,41 @@ const TripBoard = () => {
     } catch {}
   };
 
+  const itemCount = items.length;
+  const itemWord = itemCount === 1 ? 'item' : 'items';
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#faf7f2' }}>
-        <div className="text-center">
-          <div className="text-[48px] animate-pulse-load">🏝</div>
-          <p className="font-body text-[14px] text-text-muted mt-3">Loading trip...</p>
+      <div className="min-h-screen page-transition" style={{ backgroundColor: '#faf7f2' }}>
+        <div className="max-w-[480px] mx-auto pb-10">
+          {/* Header skeleton */}
+          <div
+            style={{
+              background: 'linear-gradient(180deg, #1a3647 0%, #24495e 100%)',
+              borderRadius: '0 0 28px 28px',
+              padding: '52px 20px 28px',
+              height: '180px',
+            }}
+          >
+            <div className="animate-pulse-load" style={{ marginTop: '20px' }}>
+              <div className="h-8 w-48 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
+              <div className="h-4 w-32 rounded mt-3" style={{ backgroundColor: 'rgba(255,255,255,0.07)' }} />
+            </div>
+          </div>
+          {/* Category skeletons */}
+          <div className="px-4 pt-6 flex flex-col gap-3">
+            {[0,1,2,3,4].map(i => (
+              <div
+                key={i}
+                className="rounded-2xl animate-pulse-load"
+                style={{
+                  height: '72px',
+                  backgroundColor: '#e8e4df',
+                  animationDelay: `${i * 100}ms`,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -133,7 +161,7 @@ const TripBoard = () => {
 
   if (notFound || !trip) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#faf7f2' }}>
+      <div className="min-h-screen flex items-center justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
         <div className="text-center px-5">
           <div className="text-[48px] mb-4">🗺</div>
           <h1 className="font-display text-[22px] font-bold text-navy mb-2">Trip not found</h1>
@@ -147,7 +175,7 @@ const TripBoard = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#faf7f2' }}>
+    <div className="min-h-screen page-transition" style={{ backgroundColor: '#faf7f2' }}>
       {showWelcome && (
         <WelcomePopup
           tripName={trip.name}
@@ -166,13 +194,13 @@ const TripBoard = () => {
             padding: '52px 20px 28px',
           }}
         >
-          {/* Back to home */}
+          {/* Back arrow only */}
           <button
             onClick={() => navigate('/')}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', left: '20px', color: '#c17c4e' }}
+            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.5)' }}
           >
-            ← TripBoard
+            ←
           </button>
           {/* Decorative emoji */}
           <div
@@ -185,10 +213,10 @@ const TripBoard = () => {
           {/* Share button */}
           <button
             onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
-            className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', right: '20px', color: 'rgba(255,255,255,0.55)' }}
+            className="absolute font-body text-[13px] font-medium active:opacity-60 flex items-center gap-1"
+            style={{ top: '20px', right: '20px', color: 'rgba(255,255,255,0.7)' }}
           >
-            Share
+            <span style={{ fontSize: '12px' }}>↗</span> Share
           </button>
 
           {/* Eyebrow */}
@@ -221,11 +249,11 @@ const TripBoard = () => {
 
           {/* Stats */}
           <div className="flex items-center gap-2 mt-3 font-body text-[14px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            <span>{items.length} items saved</span>
+            <span>{itemCount} {itemWord} saved</span>
             <span>·</span>
             <span className="flex items-center gap-1.5">
               <span
-                className="inline-block w-[6px] h-[6px] rounded-full animate-pulse-dot"
+                className="inline-block w-[6px] h-[6px] rounded-full animate-live-breathe"
                 style={{ backgroundColor: '#5cbf8a' }}
               />
               live
@@ -233,12 +261,13 @@ const TripBoard = () => {
           </div>
         </div>
 
-        {/* Collapse/expand all */}
-        <div className="flex justify-end px-5 pt-4 pb-1">
+        {/* Collapse/expand all — left aligned */}
+        <div className="flex justify-start px-5 pt-4 pb-1">
           <button
             onClick={handleToggleAll}
-            className="font-body text-[13px] font-medium text-copper active:opacity-70"
+            className="font-body text-[13px] font-medium text-copper active:opacity-70 flex items-center gap-1"
           >
+            <span style={{ fontSize: '11px' }}>{allCollapsed ? '≡' : '—'}</span>
             {allCollapsed ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
@@ -272,10 +301,18 @@ const TripBoard = () => {
         )}
 
         {/* Footer */}
-        <div className="text-center pt-7 pb-4">
+        <div className="text-center pt-7 pb-4 flex items-center justify-center gap-2">
           <span className="font-body text-[11px] tracking-[1px]" style={{ color: '#c8cfd3' }}>
             fortheplot.today
           </span>
+          <span className="font-body text-[11px]" style={{ color: '#c8cfd3' }}>·</span>
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="active:opacity-60"
+            style={{ color: '#c17c4e', background: 'none', border: 'none', fontSize: '13px' }}
+          >
+            ✦
+          </button>
         </div>
       </div>
 
@@ -301,6 +338,13 @@ const TripBoard = () => {
           trip={trip}
           onClose={() => setShowEdit(false)}
           onUpdated={handleTripUpdated}
+        />
+      )}
+
+      {showFeedback && (
+        <FeedbackOverlay
+          tripSlug={slug}
+          onClose={() => setShowFeedback(false)}
         />
       )}
     </div>
