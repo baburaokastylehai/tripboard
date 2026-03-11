@@ -71,12 +71,6 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
             borderBottom: '1px solid rgba(26,54,71,0.06)',
           }}
         >
-          {/* Empty state hint */}
-          {isEmpty && (
-            <p className="font-body text-[12px] text-center mb-2" style={{ color: '#c8cfd3' }}>
-              nothing here yet
-            </p>
-          )}
 
           {/* Horizontal scroll area */}
           <div
