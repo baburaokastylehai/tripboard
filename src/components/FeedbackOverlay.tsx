@@ -87,14 +87,14 @@ const FeedbackOverlay = ({ tripSlug, onClose }: Props) => {
         {/* Top section */}
         <div className="text-center">
           <div style={{ color: '#c17c4e', fontSize: '24px', marginBottom: '16px' }}>✦</div>
-          <p className="font-body text-[15px] font-normal" style={{ color: '#fff' }}>
+          <p className="font-body text-[15px] font-medium" style={{ color: '#fff' }}>
             hey, i'm atharva.
           </p>
           <p className="font-body text-[14px] mt-3" style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
-            i built this over a weekend with ai tools — no code, just intent and iteration. tripboard is an experiment in making trip planning less scattered for friend groups.
+            tripboard is a shared trip board for friend groups. one person creates a trip, shares the link, and everyone drops their bookings, restaurant finds, and plans in one place - so nothing gets lost in the chat.
           </p>
           <p className="font-body text-[14px] mt-3" style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
-            if you made it here, you're curious, and i appreciate that. if something felt off, or felt great, or you have an idea — i'd love to hear it.
+            it's early, it's evolving, and your perspective matters. if something felt off, or felt great, or you have an idea - i'd genuinely love to hear it.
           </p>
         </div>
 
