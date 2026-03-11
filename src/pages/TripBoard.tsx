@@ -104,6 +104,7 @@ const TripBoard = () => {
   const handleItemAdded = (item: TripItem) => {
     setItems(prev => [item, ...prev]);
     setAddingCategory(null);
+    trackEvent('item_added', { trip_id: trip?.id, category: item.category, type: item.type });
   };
 
   const handleTripUpdated = (updated: Trip) => {
