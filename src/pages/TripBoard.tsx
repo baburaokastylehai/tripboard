@@ -23,6 +23,7 @@ const TripBoard = () => {
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [lastToggleTime, setLastToggleTime] = useState(0);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
