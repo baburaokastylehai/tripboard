@@ -18,12 +18,14 @@ interface Props {
 }
 
 const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem }: Props) => {
+  const isEmpty = items.length === 0;
+
   return (
     <div>
       {/* Header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 p-4 active:opacity-80"
+        className="w-full flex items-center gap-3 p-4 tap-scale"
         style={{
           backgroundColor: '#fff',
           border: '1px solid rgba(26,54,71,0.06)',
@@ -34,7 +36,12 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
       >
         <span className="text-[24px] flex-shrink-0">{category.emoji}</span>
         <div className="flex-1 text-left min-w-0">
-          <div className="font-display text-[18px] font-bold text-navy">{category.name}</div>
+          <div
+            className="font-display text-[18px] font-bold text-navy"
+            style={{ opacity: isEmpty ? 0.6 : 1 }}
+          >
+            {category.name}
+          </div>
           <div className="font-body text-[12px] text-text-muted">
             {category.subtitle} · {items.length} item{items.length !== 1 ? 's' : ''}
           </div>
@@ -59,6 +66,13 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
             borderBottom: '1px solid rgba(26,54,71,0.06)',
           }}
         >
+          {/* Empty state hint */}
+          {isEmpty && (
+            <p className="font-body text-[12px] text-center mb-2" style={{ color: '#c8cfd3' }}>
+              nothing here yet
+            </p>
+          )}
+
           {/* Horizontal scroll area */}
           <div
             className="flex gap-3 overflow-x-auto pb-3 px-3"
@@ -75,7 +89,7 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
             {/* Add item card */}
             <button
               onClick={onAddItem}
-              className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper active:opacity-70"
+              className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper tap-scale"
               style={{
                 width: '148px',
                 height: '148px',

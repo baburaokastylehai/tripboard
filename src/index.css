@@ -83,6 +83,19 @@
     transform: translateY(100%);
   }
   to {
+    transform: translateY(0) ;
+  }
+}
+
+/* Bottom sheet spring — subtle overshoot */
+@keyframes slideUpSpring {
+  0% {
+    transform: translateY(100%);
+  }
+  70% {
+    transform: translateY(-3px);
+  }
+  100% {
     transform: translateY(0);
   }
 }
@@ -107,12 +120,41 @@
   50% { transform: scale(1.1); opacity: 0.7; }
 }
 
+/* Gentle float for hero emoji */
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Live dot — slow breathe */
+@keyframes liveBreathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Feedback overlay */
+@keyframes feedbackFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes feedbackFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Page transition */
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .animate-fadeSlideIn {
   animation: fadeSlideIn 0.3s ease forwards;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.3s ease forwards;
+  animation: slideUpSpring 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .animate-fadeIn {
@@ -129,4 +171,30 @@
 
 .animate-pulse-load {
   animation: pulse-load 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gentle-float {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+.animate-live-breathe {
+  animation: liveBreathe 3s ease-in-out infinite;
+}
+
+.page-transition {
+  animation: pageFadeIn 0.2s ease forwards;
+}
+
+/* Global tap active state */
+.tap-scale {
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+.tap-scale:active {
+  transform: scale(0.97);
+}
+
+/* Placeholder styling for feedback */
+textarea::placeholder,
+input::placeholder {
+  opacity: 1;
 }

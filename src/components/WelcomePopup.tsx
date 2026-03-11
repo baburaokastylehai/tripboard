@@ -32,6 +32,9 @@ const WelcomePopup = ({ tripName, tripEmoji, onDone }: Props) => {
           borderRadius: '24px',
           padding: '32px 24px',
           boxShadow: '0 8px 30px rgba(26,54,71,0.12)',
+          transition: 'transform 0.2s ease, opacity 0.2s ease',
+          transform: leaving ? 'scale(0.95)' : 'scale(1)',
+          opacity: leaving ? 0 : 1,
         }}
       >
         <div className="text-[48px] leading-none mb-4">{tripEmoji}</div>
@@ -54,7 +57,7 @@ const WelcomePopup = ({ tripName, tripEmoji, onDone }: Props) => {
         <button
           onClick={handleSubmit}
           disabled={!name.trim()}
-          className="w-full mt-4 py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80 disabled:cursor-not-allowed"
+          className="w-full mt-4 py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale disabled:cursor-not-allowed"
           style={{
             backgroundColor: name.trim() ? '#1a3647' : '#d0d5d8',
             color: name.trim() ? '#faf7f2' : '#fff',
