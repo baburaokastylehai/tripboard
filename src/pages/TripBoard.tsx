@@ -9,6 +9,7 @@ import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
+// TripBoard component
 const TripBoard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
