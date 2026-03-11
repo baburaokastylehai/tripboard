@@ -54,8 +54,8 @@ const DaySection = ({ label, items, onStatusChange, onItemTap, onAddItem, emptyH
             <ItemCard
               key={item.id}
               item={item}
-              onDelete={() => onDeleteItem(item.id)}
               onStatusChange={onStatusChange}
+              onTap={onItemTap}
             />
           ))}
 

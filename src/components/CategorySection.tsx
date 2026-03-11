@@ -91,8 +91,8 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
               <ItemCard
                 key={item.id}
                 item={item}
-                onDelete={() => onDeleteItem(item.id)}
                 onStatusChange={onStatusChange}
+                onTap={onItemTap}
               />
             ))}
 
