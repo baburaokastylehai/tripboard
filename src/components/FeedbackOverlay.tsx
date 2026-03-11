@@ -91,7 +91,7 @@ const FeedbackOverlay = ({ tripSlug, onClose }: Props) => {
             hey, i'm atharva.
           </p>
           <p className="font-body text-[14px] mt-3" style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
-            tripboard is a shared trip board for friend groups. one person creates a trip, shares the link, and everyone drops their bookings, restaurant finds, and plans in one place - so nothing gets lost in the chat.
+            tripboard is an experiment in making trip planning less scattered for friend groups. one person creates a trip, shares the link, and everyone drops their bookings, restaurant finds, and plans in one place - so nothing gets lost in the chat.
           </p>
           <p className="font-body text-[14px] mt-3" style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
             it's early, it's evolving, and your perspective matters. if something felt off, or felt great, or you have an idea - i'd genuinely love to hear it.
