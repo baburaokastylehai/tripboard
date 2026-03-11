@@ -18,7 +18,7 @@ interface Props {
   onItemTap: (item: TripItem) => void;
 }
 
-const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem, onStatusChange }: Props) => {
+const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onStatusChange, onItemTap }: Props) => {
   const isEmpty = items.length === 0;
   const bookedCount = items.filter(i => i.status === 'booked').length;
 
