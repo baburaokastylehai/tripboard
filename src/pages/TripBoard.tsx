@@ -128,8 +128,6 @@ const TripBoard = () => {
           if (idx >= 0) visited[idx] = entry; else visited.unshift(entry);
           localStorage.setItem('tripboard-visited-trips', JSON.stringify(visited));
         } catch {}
-        const hasName = localStorage.getItem('tripboard-username');
-        if (isMounted && !hasName) setShowWelcome(true);
       }
       if (isMounted) setLoading(false);
     };
