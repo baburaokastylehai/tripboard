@@ -2,10 +2,11 @@ import { useState } from 'react';
 
 interface Props {
   slug: string;
+  tripName?: string;
   onClose: () => void;
 }
 
-const ShareSheet = ({ slug, onClose }: Props) => {
+const ShareSheet = ({ slug, tripName, onClose }: Props) => {
   const [copied, setCopied] = useState(false);
   const url = `${window.location.origin}/t/${slug}`;
 
@@ -13,6 +14,25 @@ const ShareSheet = ({ slug, onClose }: Props) => {
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: tripName || 'TripBoard',
+          text: 'Join our trip on TripBoard',
+          url: window.location.href,
+        });
+        onClose();
+        return;
+      } catch (err) {
+        // User cancelled or share failed — fall through to copy
+        if ((err as Error).name === 'AbortError') return;
+      }
+    }
+    // Fallback: just copy
+    handleCopy();
   };
 
   return (
@@ -27,6 +47,7 @@ const ShareSheet = ({ slug, onClose }: Props) => {
           backgroundColor: '#faf7f2',
           borderRadius: '24px 24px 0 0',
           padding: '24px 20px 40px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
         }}
       >
         <div className="flex justify-center mb-5">
@@ -43,11 +64,11 @@ const ShareSheet = ({ slug, onClose }: Props) => {
         </div>
 
         <button
-          onClick={handleCopy}
+          onClick={handleShare}
           className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80"
           style={{ backgroundColor: '#c17c4e', color: '#fff' }}
         >
-          {copied ? 'Copied!' : 'Copy Link'}
+          {navigator.share ? 'Share' : (copied ? 'Copied!' : 'Copy Link')}
         </button>
 
         <p className="font-body text-[13px] text-text-muted text-center mt-3">

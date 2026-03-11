@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
+import { useOnlineStatus } from '@/hooks/use-online-status';
 import WelcomePopup from '@/components/WelcomePopup';
 import CategorySection from '@/components/CategorySection';
 import DaySection from '@/components/DaySection';
@@ -10,6 +11,8 @@ import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
 import ItemDetailSheet from '@/components/ItemDetailSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
+import OfflineBanner from '@/components/OfflineBanner';
+import InstallPrompt from '@/components/InstallPrompt';
 
 const formatDateRange = (start: string, end: string) => {
   const s = new Date(start + 'T00:00:00');
@@ -48,6 +51,7 @@ const getDaysInRange = (start: string, end: string) => {
 const TripBoard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [items, setItems] = useState<TripItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,6 +143,13 @@ const TripBoard = () => {
       clearPollingInterval();
     };
   }, [clearPollingInterval, fetchTrip, fetchItems, startPolling]);
+
+  // Auto-refresh when coming back online
+  useEffect(() => {
+    if (isOnline && trip) {
+      fetchItems(trip.id);
+    }
+  }, [isOnline, trip, fetchItems]);
 
   const handleToggleAll = () => {
     const next = !allCollapsed;
@@ -244,7 +255,6 @@ const TripBoard = () => {
     const sections: { key: string; label: string; items: TripItem[]; date: string | null }[] = [];
 
     if (hasDates) {
-      // Show all days in range
       days.forEach(day => {
         sections.push({
           key: day,
@@ -254,7 +264,6 @@ const TripBoard = () => {
         });
         delete byDate[day];
       });
-      // Items with dates outside range
       Object.keys(byDate).sort().forEach(day => {
         sections.push({
           key: day,
@@ -264,7 +273,6 @@ const TripBoard = () => {
         });
       });
     } else {
-      // No trip dates — group by whatever item dates exist
       Object.keys(byDate).sort().forEach(day => {
         sections.push({
           key: day,
@@ -275,7 +283,6 @@ const TripBoard = () => {
       });
     }
 
-    // Undated section at the bottom
     if (undated.length > 0 || sections.length === 0) {
       sections.push({
         key: 'undated',
@@ -290,7 +297,6 @@ const TripBoard = () => {
 
   const handleAddItemForDay = (date: string) => {
     setAddingDate(date);
-    // Default to first category
     setAddingCategory(CATEGORIES[0].id);
   };
 
@@ -306,6 +312,7 @@ const TripBoard = () => {
               background: 'linear-gradient(180deg, #1a3647 0%, #24495e 100%)',
               borderRadius: '0 0 28px 28px',
               padding: '52px 20px 28px',
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 52px)',
               height: '180px',
             }}
           >
@@ -359,7 +366,7 @@ const TripBoard = () => {
         />
       )}
 
-      <div className="max-w-[480px] mx-auto pb-10">
+      <div className="max-w-[480px] mx-auto" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)' }}>
         {/* Header */}
         <div
           className="relative overflow-hidden"
@@ -367,12 +374,13 @@ const TripBoard = () => {
             background: 'linear-gradient(180deg, #1a3647 0%, #24495e 100%)',
             borderRadius: '0 0 28px 28px',
             padding: '52px 20px 28px',
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 52px)',
           }}
         >
           <button
             onClick={() => navigate('/')}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
-            style={{ top: '20px', left: '20px', color: 'rgba(255,255,255,0.5)' }}
+            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)', left: '20px', color: 'rgba(255,255,255,0.5)' }}
           >
             ←
           </button>
@@ -386,7 +394,7 @@ const TripBoard = () => {
           <button
             onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
             className="absolute font-body text-[13px] font-medium active:opacity-60 flex items-center gap-1"
-            style={{ top: '20px', right: '20px', color: 'rgba(255,255,255,0.7)' }}
+            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)', right: '20px', color: 'rgba(255,255,255,0.7)' }}
           >
             <span style={{ fontSize: '12px' }}>↗</span> Share
           </button>
@@ -437,13 +445,16 @@ const TripBoard = () => {
             <span>·</span>
             <span className="flex items-center gap-1.5">
               <span
-                className="inline-block w-[6px] h-[6px] rounded-full animate-live-breathe"
-                style={{ backgroundColor: '#5cbf8a' }}
+                className={`inline-block w-[6px] h-[6px] rounded-full ${isOnline ? 'animate-live-breathe' : ''}`}
+                style={{ backgroundColor: isOnline ? '#5cbf8a' : '#9aacb5' }}
               />
-              live
+              {isOnline ? 'live' : 'offline'}
             </span>
           </div>
         </div>
+
+        {/* Offline banner */}
+        <OfflineBanner isOnline={isOnline} />
 
         {/* View toggle + Collapse all */}
         <div className="flex items-center justify-between px-5 pt-4 pb-1">
@@ -537,6 +548,11 @@ const TripBoard = () => {
           </div>
         )}
 
+        {/* Install prompt */}
+        <div className="pt-6">
+          <InstallPrompt />
+        </div>
+
         {/* Footer */}
         <div className="text-center pt-7 pb-4 flex flex-col items-center gap-2">
           <button
@@ -568,12 +584,14 @@ const TripBoard = () => {
           tripStartDate={trip.start_date}
           tripEndDate={trip.end_date}
           prefilledDate={addingDate}
+          isOnline={isOnline}
         />
       )}
 
       {showShare && (
         <ShareSheet
           slug={trip.slug}
+          tripName={trip.name}
           onClose={() => setShowShare(false)}
         />
       )}

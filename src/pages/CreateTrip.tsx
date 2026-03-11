@@ -38,7 +38,8 @@ const CreateTrip = () => {
       localStorage.setItem('tripboard-my-trips', JSON.stringify(saved));
 
       trackEvent('trip_created', { trip_id: data.id, trip_name: data.name, emoji: data.emoji });
-      navigate(`/t/${data.slug}`);
+      // Use replace so back button goes to / not /new
+      navigate(`/t/${data.slug}`, { replace: true });
     } catch (err) {
       console.error('Failed to create trip:', err);
       setSubmitting(false);
@@ -55,7 +56,7 @@ const CreateTrip = () => {
 
   return (
     <div className="min-h-screen flex justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
-      <div className="w-full max-w-[480px] px-5 pt-6 pb-10">
+      <div className="w-full max-w-[480px] px-5 pb-10" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 24px)' }}>
         <button
           type="button"
           onClick={() => navigate('/')}

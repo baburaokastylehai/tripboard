@@ -83,7 +83,10 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
-      <div className="w-full max-w-[480px] px-5 pt-24 pb-10 flex flex-col items-center flex-1">
+      <div
+        className="w-full max-w-[480px] px-5 pb-10 flex flex-col items-center flex-1"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 96px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)' }}
+      >
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="text-[60px] leading-none mb-4 animate-gentle-float">🗺</div>
