@@ -454,8 +454,8 @@ const TripBoard = () => {
                 collapsed={collapsed[cat.id] || false}
                 onToggle={() => setCollapsed(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
                 onAddItem={() => { setAddingCategory(cat.id); setAddingDate(null); }}
-                onDeleteItem={handleDeleteItem}
                 onStatusChange={handleStatusChange}
+                onItemTap={(item) => setDetailItem(item)}
               />
             ))}
           </div>
