@@ -469,8 +469,8 @@ const TripBoard = () => {
                 key={section.key}
                 label={section.label}
                 items={section.items}
-                onDeleteItem={handleDeleteItem}
                 onStatusChange={handleStatusChange}
+                onItemTap={(item) => setDetailItem(item)}
                 onAddItem={section.date ? () => handleAddItemForDay(section.date!) : undefined}
                 emptyHint={section.date ? 'nothing planned yet' : undefined}
               />
