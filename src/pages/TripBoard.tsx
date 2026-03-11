@@ -158,7 +158,10 @@ const TripBoard = () => {
   const handleStatusChange = async (itemId: string, status: string) => {
     const prevItems = items;
     setItems(prev => prev.map(i => i.id === itemId ? { ...i, status } : i));
-    setLastToggleTime(Date.now());
+    const now = Date.now();
+    setLastToggleTime(now);
+    lastToggleTimeRef.current = now;
+    recentStatusChanges.current[itemId] = { status, time: now };
     const { error } = await supabase.from('trip_items').update({ status }).eq('id', itemId);
     if (error) {
       console.error('Status update failed:', error);
