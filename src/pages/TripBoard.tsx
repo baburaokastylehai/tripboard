@@ -62,6 +62,7 @@ const TripBoard = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastToggleTime, setLastToggleTime] = useState(0);
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
+  const [detailItem, setDetailItem] = useState<TripItem | null>(null);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
