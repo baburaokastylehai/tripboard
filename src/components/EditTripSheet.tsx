@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase, Trip, EMOJI_OPTIONS } from '@/lib/supabase';
+import TripDatePicker from '@/components/TripDatePicker';
 
 interface Props {
   trip: Trip;
@@ -113,32 +114,12 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
             onBlur={handleBlur}
           />
 
-          {/* Date fields */}
-          <div className="font-body text-[13px] mt-1" style={{ color: '#9aacb5' }}>when?</div>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none"
-                style={inputStyle}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-              />
-            </div>
-            <div className="flex-1">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none"
-                style={inputStyle}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-              />
-            </div>
-          </div>
+          <TripDatePicker
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+          />
         </div>
 
         <button
