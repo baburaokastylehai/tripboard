@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
