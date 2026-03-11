@@ -60,11 +60,16 @@ const TripBoard = () => {
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [lastToggleTime, setLastToggleTime] = useState(0);
-  const lastToggleTimeRef = useRef(0);
-  const recentStatusChanges = useRef<Record<string, { status: string; time: number }>>({});
+  const pollingIntervalRef = useRef<number | null>(null);
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
   const [detailItem, setDetailItem] = useState<TripItem | null>(null);
+
+  const clearPollingInterval = useCallback(() => {
+    if (pollingIntervalRef.current !== null) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, []);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
@@ -87,7 +92,7 @@ const TripBoard = () => {
     return data;
   }, [slug]);
 
-  const fetchItems = useCallback(async (tripId: string, isPolling = false) => {
+  const fetchItems = useCallback(async (tripId: string) => {
     const { data, error } = await supabase
       .from('trip_items')
       .select('*')
@@ -95,28 +100,25 @@ const TripBoard = () => {
       .order('created_at', { ascending: false });
     if (error) console.error('Fetch items failed:', error);
     if (data) {
-      if (isPolling) {
-        // Merge: preserve local status changes made in last 15 seconds
-        const now = Date.now();
-        const merged = data.map(item => {
-          const recent = recentStatusChanges.current[item.id];
-          if (recent && now - recent.time < 15000) {
-            return { ...item, status: recent.status };
-          }
-          return item;
-        });
-        setItems(merged);
-      } else {
-        setItems(data);
-      }
+      setItems(data);
     }
   }, []);
 
+  const startPolling = useCallback((tripId: string) => {
+    clearPollingInterval();
+    pollingIntervalRef.current = window.setInterval(() => {
+      fetchItems(tripId);
+    }, 10000);
+  }, [clearPollingInterval, fetchItems]);
+
   useEffect(() => {
+    let isMounted = true;
+
     const init = async () => {
       const tripData = await fetchTrip();
-      if (tripData) {
+      if (tripData && isMounted) {
         await fetchItems(tripData.id);
+        startPolling(tripData.id);
         try {
           const visited = JSON.parse(localStorage.getItem('tripboard-visited-trips') || '[]');
           const entry = { id: tripData.id, slug: tripData.slug, name: tripData.name, emoji: tripData.emoji, subtitle: tripData.subtitle };
@@ -125,22 +127,18 @@ const TripBoard = () => {
           localStorage.setItem('tripboard-visited-trips', JSON.stringify(visited));
         } catch {}
         const hasName = localStorage.getItem('tripboard-username');
-        if (!hasName) setShowWelcome(true);
+        if (isMounted && !hasName) setShowWelcome(true);
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
     };
-    init();
-  }, [fetchTrip, fetchItems]);
 
-  useEffect(() => {
-    if (!trip) return;
-    const interval = setInterval(() => {
-      if (Date.now() - lastToggleTimeRef.current > 5000) {
-        fetchItems(trip.id, true);
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [trip, fetchItems]);
+    init();
+
+    return () => {
+      isMounted = false;
+      clearPollingInterval();
+    };
+  }, [clearPollingInterval, fetchTrip, fetchItems, startPolling]);
 
   const handleToggleAll = () => {
     const next = !allCollapsed;
@@ -155,18 +153,46 @@ const TripBoard = () => {
     await supabase.from('trip_items').delete().eq('id', itemId);
   };
 
-  const handleStatusChange = async (itemId: string, status: string) => {
-    const prevItems = items;
-    setItems(prev => prev.map(i => i.id === itemId ? { ...i, status } : i));
-    const now = Date.now();
-    setLastToggleTime(now);
-    lastToggleTimeRef.current = now;
-    recentStatusChanges.current[itemId] = { status, time: now };
-    const { error } = await supabase.from('trip_items').update({ status }).eq('id', itemId);
+  const handleStatusChange = async (itemId: string, newStatus: string) => {
+    if (!trip) return;
+
+    const currentItem = items.find(item => item.id === itemId);
+    if (!currentItem) return;
+
+    const oldStatus = currentItem.status;
+
+    if (pollingIntervalRef.current !== null) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
+    setItems(prev => prev.map(item =>
+      item.id === itemId ? { ...item, status: newStatus } : item
+    ));
+
+    const { error } = await supabase
+      .from('trip_items')
+      .update({ status: newStatus })
+      .eq('id', itemId);
+
     if (error) {
       console.error('Status update failed:', error);
-      setItems(prevItems);
+      setItems(prev => prev.map(item =>
+        item.id === itemId ? { ...item, status: oldStatus } : item
+      ));
     }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const { data } = await supabase
+      .from('trip_items')
+      .select('*')
+      .eq('trip_id', trip.id)
+      .order('created_at', { ascending: false });
+
+    if (data) setItems(data);
+
+    startPolling(trip.id);
   };
 
   const handleClearAll = async () => {
