@@ -52,7 +52,9 @@ const TripBoard = () => {
   const [items, setItems] = useState<TripItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return !localStorage.getItem('tripboard-username');
+  });
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
