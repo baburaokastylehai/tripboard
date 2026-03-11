@@ -546,6 +546,27 @@ const TripBoard = () => {
           onClose={() => setShowFeedback(false)}
         />
       )}
+
+      {detailItem && (
+        <ItemDetailSheet
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+          onStatusChange={(id, status) => {
+            handleStatusChange(id, status);
+            setDetailItem(prev => prev ? { ...prev, status } : null);
+          }}
+          onDelete={(id) => {
+            handleDeleteItem(id);
+            setDetailItem(null);
+          }}
+          onItemUpdated={(updated) => {
+            setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
+            setDetailItem(updated);
+          }}
+          tripStartDate={trip.start_date}
+          tripEndDate={trip.end_date}
+        />
+      )}
     </div>
   );
 };
