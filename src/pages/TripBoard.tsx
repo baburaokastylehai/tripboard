@@ -61,6 +61,8 @@ const TripBoard = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastToggleTime, setLastToggleTime] = useState(0);
+  const lastToggleTimeRef = useRef(0);
+  const recentStatusChanges = useRef<Record<string, { status: string; time: number }>>({});
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
   const [detailItem, setDetailItem] = useState<TripItem | null>(null);
 
