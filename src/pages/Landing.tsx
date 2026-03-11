@@ -196,7 +196,7 @@ const Landing = () => {
             className="font-body text-[11px] tap-scale"
             style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
           >
-            the story behind this · your thoughts ✦
+            the story behind this ✦ share your thoughts
           </button>
         </div>
       </div>
