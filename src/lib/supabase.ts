@@ -33,7 +33,7 @@ export interface TripItem {
 }
 
 export const CATEGORIES = [
-  { id: 'stay', emoji: '🏠', name: 'Stay', subtitle: 'Vrbo & Accommodation' },
+  { id: 'stay', emoji: '🏠', name: 'Stay', subtitle: 'Airbnb, Vrbo & Hotels' },
   { id: 'transport', emoji: '⛴', name: 'Getting There', subtitle: 'Ferry, Flights & Transit' },
   { id: 'activities', emoji: '🤿', name: 'Activities', subtitle: 'Scuba, Tours & Adventures' },
   { id: 'food', emoji: '🍽', name: 'Eat & Drink', subtitle: 'Restaurants & Bars' },
