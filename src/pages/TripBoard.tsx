@@ -267,13 +267,12 @@ const TripBoard = () => {
           </div>
         </div>
 
-        {/* Collapse/expand all — left aligned */}
-        <div className="flex justify-start px-5 pt-4 pb-1">
+        {/* Collapse/expand all — right aligned */}
+        <div className="flex justify-end px-5 pt-4 pb-1">
           <button
             onClick={handleToggleAll}
-            className="font-body text-[13px] font-medium text-copper active:opacity-70 flex items-center gap-1"
+            className="font-body text-[13px] font-medium text-copper active:opacity-70"
           >
-            <span style={{ fontSize: '11px' }}>{allCollapsed ? '≡' : '—'}</span>
             {allCollapsed ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
