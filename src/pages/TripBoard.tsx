@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
+import { trackEvent } from '@/lib/posthog';
 import WelcomePopup from '@/components/WelcomePopup';
 import CategorySection from '@/components/CategorySection';
 import AddItemSheet from '@/components/AddItemSheet';
