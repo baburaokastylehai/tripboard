@@ -26,6 +26,7 @@ export interface TripItem {
   file_name: string | null;
   added_by_name: string;
   created_at: number;
+  status: string;
 }
 
 export const CATEGORIES = [

@@ -56,6 +56,7 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
       file_name: type === 'file' ? fileName : null,
       added_by_name: addedByName,
       created_at: createdAt,
+      status: 'considering',
     };
 
     // Optimistic

@@ -15,10 +15,12 @@ interface Props {
   onToggle: () => void;
   onAddItem: () => void;
   onDeleteItem: (id: string) => void;
+  onStatusChange: (id: string, status: string) => void;
 }
 
-const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem }: Props) => {
+const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem, onStatusChange }: Props) => {
   const isEmpty = items.length === 0;
+  const bookedCount = items.filter(i => i.status === 'booked').length;
 
   return (
     <div>
@@ -44,6 +46,9 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
           </div>
           <div className="font-body text-[12px] text-text-muted">
             {category.subtitle} · {items.length} item{items.length !== 1 ? 's' : ''}
+            {bookedCount > 0 && (
+              <span style={{ color: '#5cbf8a' }}> · {bookedCount} booked</span>
+            )}
           </div>
         </div>
         <span
@@ -83,7 +88,12 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDe
             }}
           >
             {items.map((item) => (
-              <ItemCard key={item.id} item={item} onDelete={() => onDeleteItem(item.id)} />
+              <ItemCard
+                key={item.id}
+                item={item}
+                onDelete={() => onDeleteItem(item.id)}
+                onStatusChange={onStatusChange}
+              />
             ))}
 
             {/* Add item card */}
