@@ -8,6 +8,7 @@ import DaySection from '@/components/DaySection';
 import AddItemSheet from '@/components/AddItemSheet';
 import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
+import ItemDetailSheet from '@/components/ItemDetailSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 const formatDateRange = (start: string, end: string) => {
