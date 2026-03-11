@@ -23,6 +23,7 @@ const TripBoard = () => {
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [lastToggleTime, setLastToggleTime] = useState(0);
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
@@ -77,9 +78,13 @@ const TripBoard = () => {
 
   useEffect(() => {
     if (!trip) return;
-    const interval = setInterval(() => fetchItems(trip.id), 10000);
+    const interval = setInterval(() => {
+      if (Date.now() - lastToggleTime > 5000) {
+        fetchItems(trip.id);
+      }
+    }, 10000);
     return () => clearInterval(interval);
-  }, [trip, fetchItems]);
+  }, [trip, fetchItems, lastToggleTime]);
 
   const handleToggleAll = () => {
     const next = !allCollapsed;
@@ -95,9 +100,14 @@ const TripBoard = () => {
   };
 
   const handleStatusChange = async (itemId: string, status: string) => {
+    const prevItems = items;
     setItems(prev => prev.map(i => i.id === itemId ? { ...i, status } : i));
+    setLastToggleTime(Date.now());
     const { error } = await supabase.from('trip_items').update({ status }).eq('id', itemId);
-    if (error) console.error('Status update failed:', error);
+    if (error) {
+      console.error('Status update failed:', error);
+      setItems(prevItems);
+    }
   };
 
   const handleClearAll = async () => {
@@ -267,13 +277,12 @@ const TripBoard = () => {
           </div>
         </div>
 
-        {/* Collapse/expand all — left aligned */}
-        <div className="flex justify-start px-5 pt-4 pb-1">
+        {/* Collapse/expand all — right aligned */}
+        <div className="flex justify-end px-5 pt-4 pb-1">
           <button
             onClick={handleToggleAll}
-            className="font-body text-[13px] font-medium text-copper active:opacity-70 flex items-center gap-1"
+            className="font-body text-[13px] font-medium text-copper active:opacity-70"
           >
-            <span style={{ fontSize: '11px' }}>{allCollapsed ? '≡' : '—'}</span>
             {allCollapsed ? 'Expand all' : 'Collapse all'}
           </button>
         </div>
