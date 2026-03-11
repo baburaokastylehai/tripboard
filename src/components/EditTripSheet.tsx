@@ -11,6 +11,8 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
   const [emoji, setEmoji] = useState(trip.emoji);
   const [name, setName] = useState(trip.name);
   const [subtitle, setSubtitle] = useState(trip.subtitle || '');
+  const [startDate, setStartDate] = useState(trip.start_date || '');
+  const [endDate, setEndDate] = useState(trip.end_date || '');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -20,7 +22,13 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
 
     const { data, error } = await supabase
       .from('trips')
-      .update({ name: name.trim(), subtitle: subtitle.trim(), emoji })
+      .update({
+        name: name.trim(),
+        subtitle: subtitle.trim(),
+        emoji,
+        start_date: startDate || null,
+        end_date: endDate || null,
+      })
       .eq('id', trip.id)
       .select()
       .single();
@@ -31,6 +39,10 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
     }
     setSaving(false);
   };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.target.style.borderColor = '#c17c4e');
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)');
+  const inputStyle = { border: '1.5px solid rgba(26,54,71,0.12)', backgroundColor: '#fff' };
 
   return (
     <div
@@ -86,9 +98,9 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-[14px] rounded-xl font-body text-[16px] text-navy outline-none"
-            style={{ border: '1.5px solid rgba(26,54,71,0.12)', backgroundColor: '#fff' }}
-            onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
           <input
             type="text"
@@ -96,10 +108,37 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="Subtitle"
             className="w-full px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none"
-            style={{ border: '1.5px solid rgba(26,54,71,0.12)', backgroundColor: '#fff' }}
-            onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
+
+          {/* Date fields */}
+          <div className="font-body text-[13px] mt-1" style={{ color: '#9aacb5' }}>when?</div>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none"
+                style={inputStyle}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none"
+                style={inputStyle}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+            </div>
+          </div>
         </div>
 
         <button

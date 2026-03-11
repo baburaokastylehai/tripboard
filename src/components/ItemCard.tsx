@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { supabase, TripItem } from '@/lib/supabase';
+import { TripItem } from '@/lib/supabase';
 
 interface Props {
   item: TripItem;
@@ -14,6 +13,11 @@ const extractHostname = (url: string) => {
   } catch {
     return url;
   }
+};
+
+const formatItemDate = (dateStr: string) => {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
@@ -84,6 +88,14 @@ const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
             <img src={item.file_data} alt="" className="w-full h-full object-cover" />
           </div>
         )}
+
+        {/* Item date */}
+        {item.item_date && (
+          <div className="font-body text-[10px] mt-0.5" style={{ color: 'rgba(26,54,71,0.5)' }}>
+            {formatItemDate(item.item_date)}
+          </div>
+        )}
+
         <div className="font-body text-[10px] text-text-muted mt-1 truncate">
           by {item.added_by_name}
         </div>
