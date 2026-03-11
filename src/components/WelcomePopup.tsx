@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { identifyUser, trackEvent } from '@/lib/posthog';
 
 interface Props {
   tripName: string;
@@ -13,6 +14,8 @@ const WelcomePopup = ({ tripName, tripEmoji, onDone }: Props) => {
   const handleSubmit = () => {
     if (!name.trim()) return;
     localStorage.setItem('tripboard-username', name.trim());
+    identifyUser(name.trim());
+    trackEvent('user_joined_trip', { trip_name: tripName });
     setLeaving(true);
     setTimeout(onDone, 300);
   };

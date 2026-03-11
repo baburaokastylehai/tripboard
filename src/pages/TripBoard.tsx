@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
+import { trackEvent } from '@/lib/posthog';
 import WelcomePopup from '@/components/WelcomePopup';
 import CategorySection from '@/components/CategorySection';
 import AddItemSheet from '@/components/AddItemSheet';
@@ -103,6 +104,7 @@ const TripBoard = () => {
   const handleItemAdded = (item: TripItem) => {
     setItems(prev => [item, ...prev]);
     setAddingCategory(null);
+    trackEvent('item_added', { trip_id: trip?.id, category: item.category, type: item.type });
   };
 
   const handleTripUpdated = (updated: Trip) => {
@@ -182,7 +184,7 @@ const TripBoard = () => {
 
           {/* Share button */}
           <button
-            onClick={() => setShowShare(true)}
+            onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
             style={{ top: '20px', right: '20px', color: 'rgba(255,255,255,0.55)' }}
           >

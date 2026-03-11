@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, EMOJI_OPTIONS } from '@/lib/supabase';
+import { trackEvent } from '@/lib/posthog';
 
 const CreateTrip = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const CreateTrip = () => {
       saved.push({ id: data.id, slug: data.slug, name: data.name, emoji: data.emoji, subtitle: data.subtitle });
       localStorage.setItem('tripboard-my-trips', JSON.stringify(saved));
 
+      trackEvent('trip_created', { trip_id: data.id, trip_name: data.name, emoji: data.emoji });
       navigate(`/t/${data.slug}`);
     } catch (err) {
       console.error('Failed to create trip:', err);
