@@ -18,27 +18,49 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim() || saving) return;
+    const trimmedName = name.trim();
+    if (!trimmedName || saving) {
+      console.error('EditTripSheet: blocked save — name empty or already saving', { trimmedName, saving });
+      return;
+    }
     setSaving(true);
 
-    const { data, error } = await supabase
-      .from('trips')
-      .update({
-        name: name.trim(),
+    try {
+      const updatePayload = {
+        name: trimmedName,
         subtitle: subtitle.trim(),
         emoji,
         start_date: startDate || null,
         end_date: endDate || null,
-      })
-      .eq('id', trip.id)
-      .select()
-      .single();
+      };
+      console.log('EditTripSheet: saving with payload', updatePayload, 'tripId:', trip.id);
 
-    if (!error && data) {
-      onUpdated(data);
-      onClose();
+      const { data, error } = await supabase
+        .from('trips')
+        .update(updatePayload)
+        .eq('id', trip.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('EditTripSheet: Supabase update error', error);
+      }
+
+      if (data) {
+        console.log('EditTripSheet: save success', data);
+        onUpdated(data);
+        onClose();
+      } else if (!error) {
+        console.error('EditTripSheet: no data returned, no error — closing anyway');
+        // Still close and refresh with local data
+        onUpdated({ ...trip, ...updatePayload });
+        onClose();
+      }
+    } catch (err) {
+      console.error('EditTripSheet: unexpected error', err);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.target.style.borderColor = '#c17c4e');
