@@ -16,9 +16,10 @@ interface Props {
   tripStartDate?: string | null;
   tripEndDate?: string | null;
   prefilledDate?: string | null;
+  isOnline?: boolean;
 }
 
-const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, tripEndDate, prefilledDate }: Props) => {
+const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, tripEndDate, prefilledDate, isOnline = true }: Props) => {
   const [type, setType] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
@@ -98,6 +99,7 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
           backgroundColor: '#faf7f2',
           borderRadius: '24px 24px 0 0',
           padding: '24px 20px 40px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
           maxHeight: '85vh',
         }}
       >
@@ -107,6 +109,16 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
 
         <h2 className="font-display text-[22px] font-bold text-navy">Add to {category.name}</h2>
         <p className="font-body text-[14px] mb-5" style={{ color: '#7a8f9a' }}>{category.subtitle}</p>
+
+        {/* Offline message */}
+        {!isOnline && (
+          <div
+            className="font-body text-[13px] text-center py-3 px-4 rounded-xl mb-4"
+            style={{ color: '#9aacb5', backgroundColor: 'rgba(154,172,181,0.1)' }}
+          >
+            you're offline right now — try again in a bit
+          </div>
+        )}
 
         {!type ? (
           <div className="flex gap-[10px]">
@@ -229,11 +241,11 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
 
             <button
               onClick={handleSubmit}
-              disabled={!title.trim() || submitting}
+              disabled={!title.trim() || submitting || !isOnline}
               className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold mt-1 transition-opacity active:opacity-80 disabled:cursor-not-allowed"
               style={{
-                backgroundColor: title.trim() ? '#1a3647' : '#d0d5d8',
-                color: title.trim() ? '#faf7f2' : '#fff',
+                backgroundColor: (title.trim() && isOnline) ? '#1a3647' : '#d0d5d8',
+                color: (title.trim() && isOnline) ? '#faf7f2' : '#fff',
               }}
             >
               {submitting ? 'Adding...' : `Add to ${category.name}`}
