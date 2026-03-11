@@ -14,8 +14,8 @@ interface Props {
   collapsed: boolean;
   onToggle: () => void;
   onAddItem: () => void;
-  onDeleteItem: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
+  onItemTap: (item: TripItem) => void;
 }
 
 const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onDeleteItem, onStatusChange }: Props) => {
