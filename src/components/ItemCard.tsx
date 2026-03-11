@@ -1,8 +1,10 @@
-import { TripItem } from '@/lib/supabase';
+import { useState } from 'react';
+import { supabase, TripItem } from '@/lib/supabase';
 
 interface Props {
   item: TripItem;
   onDelete: () => void;
+  onStatusChange: (id: string, status: string) => void;
 }
 
 const extractHostname = (url: string) => {
@@ -14,8 +16,14 @@ const extractHostname = (url: string) => {
   }
 };
 
-const ItemCard = ({ item, onDelete }: Props) => {
-  const typeIcon = item.type === 'link' ? '🔗' : item.type === 'file' ? '📄' : '📝';
+const ItemCard = ({ item, onDelete, onStatusChange }: Props) => {
+  const isBooked = item.status === 'booked';
+
+  const handleToggleStatus = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newStatus = isBooked ? 'considering' : 'booked';
+    onStatusChange(item.id, newStatus);
+  };
 
   return (
     <div
@@ -28,6 +36,7 @@ const ItemCard = ({ item, onDelete }: Props) => {
         padding: '14px',
         boxShadow: '0 1px 4px rgba(26,54,71,0.07)',
         border: '1px solid rgba(26,54,71,0.06)',
+        borderLeft: isBooked ? '3px solid #5cbf8a' : '1px solid rgba(26,54,71,0.06)',
       }}
     >
       {/* Delete */}
@@ -39,15 +48,14 @@ const ItemCard = ({ item, onDelete }: Props) => {
         ×
       </button>
 
-      {/* Top: type icon + title */}
+      {/* Top: title */}
       <div className="min-w-0">
-        <span className="text-[20px] leading-none">{typeIcon}</span>
-        <div className="font-body text-[13px] font-semibold text-navy mt-1.5 leading-snug line-clamp-2">
+        <div className="font-body text-[13px] font-semibold text-navy leading-snug line-clamp-2">
           {item.title}
         </div>
       </div>
 
-      {/* Bottom: meta */}
+      {/* Bottom: meta + status */}
       <div className="min-w-0">
         {item.type === 'link' && item.url && (
           <a
@@ -79,6 +87,22 @@ const ItemCard = ({ item, onDelete }: Props) => {
         <div className="font-body text-[10px] text-text-muted mt-1 truncate">
           by {item.added_by_name}
         </div>
+
+        {/* Status toggle */}
+        <button
+          onClick={handleToggleStatus}
+          className="font-body text-[10px] mt-1 flex items-center gap-1 active:opacity-70"
+          style={{
+            color: isBooked ? '#5cbf8a' : '#c17c4e',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            transition: 'color 0.15s',
+          }}
+        >
+          <span>{isBooked ? '✓' : '○'}</span>
+          {isBooked ? 'booked' : 'considering'}
+        </button>
       </div>
     </div>
   );
