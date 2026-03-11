@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { identifyUser, trackEvent } from '@/lib/posthog';
 
 interface Props {
   tripName: string;
