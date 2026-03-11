@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, EMOJI_OPTIONS } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
+import TripDatePicker from '@/components/TripDatePicker';
 
 const CreateTrip = () => {
   const navigate = useNavigate();
