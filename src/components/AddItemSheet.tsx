@@ -13,15 +13,19 @@ interface Props {
   category: CategoryDef;
   onClose: () => void;
   onItemAdded: (item: TripItem) => void;
+  tripStartDate?: string | null;
+  tripEndDate?: string | null;
+  prefilledDate?: string | null;
 }
 
-const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
+const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, tripEndDate, prefilledDate }: Props) => {
   const [type, setType] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [content, setContent] = useState('');
   const [fileData, setFileData] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [itemDate, setItemDate] = useState(prefilledDate || '');
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -57,9 +61,9 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
       added_by_name: addedByName,
       created_at: createdAt,
       status: 'considering',
+      item_date: itemDate || null,
     };
 
-    // Optimistic
     onItemAdded(newItem);
 
     const { error } = await supabase.from('trip_items').insert(newItem);
@@ -79,6 +83,9 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
     backgroundColor: '#fff',
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = '#c17c4e');
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)');
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -94,7 +101,6 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
           maxHeight: '85vh',
         }}
       >
-        {/* Drag handle */}
         <div className="flex justify-center mb-5">
           <div style={{ width: '40px', height: '4px', backgroundColor: '#ccc', borderRadius: '2px' }} />
         </div>
@@ -103,7 +109,6 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
         <p className="font-body text-[14px] mb-5" style={{ color: '#7a8f9a' }}>{category.subtitle}</p>
 
         {!type ? (
-          /* Step 1: Pick type */
           <div className="flex gap-[10px]">
             {types.map((t) => (
               <button
@@ -122,7 +127,6 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
             ))}
           </div>
         ) : (
-          /* Step 2: Form */
           <div>
             <button
               onClick={() => setType(null)}
@@ -139,8 +143,8 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-[14px] font-body text-[16px] text-navy placeholder:text-text-muted outline-none mb-3"
               style={inputStyle}
-              onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-              onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               autoFocus
             />
 
@@ -152,8 +156,8 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
                 onChange={(e) => setUrl(e.target.value)}
                 className="w-full px-4 py-[14px] font-body text-[15px] text-navy placeholder:text-text-muted outline-none mb-3"
                 style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-                onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
               />
             )}
 
@@ -165,8 +169,8 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full px-4 py-[14px] font-body text-[15px] text-navy placeholder:text-text-muted outline-none resize-none mb-3"
                 style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-                onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
               />
             )}
 
@@ -206,6 +210,22 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded }: Props) => {
                 )}
               </div>
             )}
+
+            {/* Date field */}
+            <div className="mb-3">
+              <div className="font-body text-[13px] mb-1.5" style={{ color: '#9aacb5' }}>when?</div>
+              <input
+                type="date"
+                value={itemDate}
+                onChange={(e) => setItemDate(e.target.value)}
+                min={tripStartDate || undefined}
+                max={tripEndDate || undefined}
+                className="w-full px-4 py-[14px] font-body text-[14px] text-navy outline-none"
+                style={inputStyle}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+            </div>
 
             <button
               onClick={handleSubmit}

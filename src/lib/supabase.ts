@@ -12,6 +12,8 @@ export interface Trip {
   emoji: string;
   slug: string;
   created_at: string;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 export interface TripItem {
@@ -27,6 +29,7 @@ export interface TripItem {
   added_by_name: string;
   created_at: number;
   status: string;
+  item_date: string | null;
 }
 
 export const CATEGORIES = [

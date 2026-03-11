@@ -8,6 +8,8 @@ const CreateTrip = () => {
   const [emoji, setEmoji] = useState('🏝');
   const [name, setName] = useState('');
   const [subtitle, setSubtitle] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -18,13 +20,18 @@ const CreateTrip = () => {
     try {
       const { data, error } = await supabase
         .from('trips')
-        .insert({ name: name.trim(), subtitle: subtitle.trim(), emoji })
+        .insert({
+          name: name.trim(),
+          subtitle: subtitle.trim(),
+          emoji,
+          start_date: startDate || null,
+          end_date: endDate || null,
+        })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Save to localStorage
       const saved = JSON.parse(localStorage.getItem('tripboard-my-trips') || '[]');
       saved.push({ id: data.id, slug: data.slug, name: data.name, emoji: data.emoji, subtitle: data.subtitle });
       localStorage.setItem('tripboard-my-trips', JSON.stringify(saved));
@@ -37,10 +44,17 @@ const CreateTrip = () => {
     }
   };
 
+  const inputStyle = {
+    border: '1.5px solid rgba(26,54,71,0.12)',
+    backgroundColor: '#fff',
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.target.style.borderColor = '#c17c4e');
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)');
+
   return (
     <div className="min-h-screen flex justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
       <div className="w-full max-w-[480px] px-5 pt-6 pb-10">
-        {/* Back */}
         <button
           type="button"
           onClick={() => navigate('/')}
@@ -89,12 +103,9 @@ const CreateTrip = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-[14px] rounded-xl font-body text-[16px] text-navy placeholder:text-text-muted outline-none transition-colors"
-            style={{
-              border: '1.5px solid rgba(26,54,71,0.12)',
-              backgroundColor: '#fff',
-            }}
-            onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
           <input
             type="text"
@@ -102,13 +113,39 @@ const CreateTrip = () => {
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             className="w-full px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none transition-colors"
-            style={{
-              border: '1.5px solid rgba(26,54,71,0.12)',
-              backgroundColor: '#fff',
-            }}
-            onFocus={(e) => (e.target.style.borderColor = '#c17c4e')}
-            onBlur={(e) => (e.target.style.borderColor = 'rgba(26,54,71,0.12)')}
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
+
+          {/* Date fields */}
+          <div className="font-body text-[13px] mt-1" style={{ color: '#9aacb5' }}>when?</div>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none transition-colors"
+                style={inputStyle}
+                placeholder="Start date"
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-4 py-[14px] rounded-xl font-body text-[14px] text-navy outline-none transition-colors"
+                style={inputStyle}
+                placeholder="End date"
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+              />
+            </div>
+          </div>
         </div>
 
         <button
