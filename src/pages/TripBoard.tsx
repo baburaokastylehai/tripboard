@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
@@ -61,6 +61,8 @@ const TripBoard = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastToggleTime, setLastToggleTime] = useState(0);
+  const lastToggleTimeRef = useRef(0);
+  const recentStatusChanges = useRef<Record<string, { status: string; time: number }>>({});
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
   const [detailItem, setDetailItem] = useState<TripItem | null>(null);
 
@@ -85,14 +87,29 @@ const TripBoard = () => {
     return data;
   }, [slug]);
 
-  const fetchItems = useCallback(async (tripId: string) => {
+  const fetchItems = useCallback(async (tripId: string, isPolling = false) => {
     const { data, error } = await supabase
       .from('trip_items')
       .select('*')
       .eq('trip_id', tripId)
       .order('created_at', { ascending: false });
     if (error) console.error('Fetch items failed:', error);
-    if (data) setItems(data);
+    if (data) {
+      if (isPolling) {
+        // Merge: preserve local status changes made in last 15 seconds
+        const now = Date.now();
+        const merged = data.map(item => {
+          const recent = recentStatusChanges.current[item.id];
+          if (recent && now - recent.time < 15000) {
+            return { ...item, status: recent.status };
+          }
+          return item;
+        });
+        setItems(merged);
+      } else {
+        setItems(data);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -118,12 +135,12 @@ const TripBoard = () => {
   useEffect(() => {
     if (!trip) return;
     const interval = setInterval(() => {
-      if (Date.now() - lastToggleTime > 5000) {
-        fetchItems(trip.id);
+      if (Date.now() - lastToggleTimeRef.current > 5000) {
+        fetchItems(trip.id, true);
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [trip, fetchItems, lastToggleTime]);
+  }, [trip, fetchItems]);
 
   const handleToggleAll = () => {
     const next = !allCollapsed;
@@ -141,7 +158,10 @@ const TripBoard = () => {
   const handleStatusChange = async (itemId: string, status: string) => {
     const prevItems = items;
     setItems(prev => prev.map(i => i.id === itemId ? { ...i, status } : i));
-    setLastToggleTime(Date.now());
+    const now = Date.now();
+    setLastToggleTime(now);
+    lastToggleTimeRef.current = now;
+    recentStatusChanges.current[itemId] = { status, time: now };
     const { error } = await supabase.from('trip_items').update({ status }).eq('id', itemId);
     if (error) {
       console.error('Status update failed:', error);
