@@ -460,7 +460,7 @@ const TripBoard = () => {
                 padding: 0,
               }}
             >
-              Categories
+              By Category
             </button>
             <span style={{ color: '#9aacb5' }}>·</span>
             <button
