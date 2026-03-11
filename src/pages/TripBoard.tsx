@@ -184,7 +184,7 @@ const TripBoard = () => {
 
           {/* Share button */}
           <button
-            onClick={() => setShowShare(true)}
+            onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
             style={{ top: '20px', right: '20px', color: 'rgba(255,255,255,0.55)' }}
           >
