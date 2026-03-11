@@ -1,15 +1,49 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
 import WelcomePopup from '@/components/WelcomePopup';
 import CategorySection from '@/components/CategorySection';
+import DaySection from '@/components/DaySection';
 import AddItemSheet from '@/components/AddItemSheet';
 import ShareSheet from '@/components/ShareSheet';
 import EditTripSheet from '@/components/EditTripSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
-// TripBoard component
+const formatDateRange = (start: string, end: string) => {
+  const s = new Date(start + 'T00:00:00');
+  const e = new Date(end + 'T00:00:00');
+  const sMonth = s.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  const eMonth = e.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  const sDay = s.getDate();
+  const eDay = e.getDate();
+  const year = e.getFullYear();
+  if (sMonth === eMonth) {
+    return `${sMonth} ${sDay}–${eDay}, ${year}`;
+  }
+  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
+};
+
+const formatDayLabel = (dateStr: string) => {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+  const month = d.toLocaleDateString('en-US', { month: 'short' });
+  const date = d.getDate();
+  return `${day}, ${month} ${date}`;
+};
+
+const getDaysInRange = (start: string, end: string) => {
+  const days: string[] = [];
+  const s = new Date(start + 'T00:00:00');
+  const e = new Date(end + 'T00:00:00');
+  const cur = new Date(s);
+  while (cur <= e) {
+    days.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
+};
+
 const TripBoard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -21,10 +55,12 @@ const TripBoard = () => {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
+  const [addingDate, setAddingDate] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastToggleTime, setLastToggleTime] = useState(0);
+  const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
 
   const isCreator = useCallback(() => {
     if (!trip) return false;
@@ -121,6 +157,7 @@ const TripBoard = () => {
   const handleItemAdded = (item: TripItem) => {
     setItems(prev => [item, ...prev]);
     setAddingCategory(null);
+    setAddingDate(null);
     trackEvent('item_added', { trip_id: trip?.id, category: item.category, type: item.type });
   };
 
@@ -136,6 +173,79 @@ const TripBoard = () => {
     } catch {}
   };
 
+  // By Day view data
+  const dayViewData = useMemo(() => {
+    if (!trip) return [];
+
+    const hasDates = trip.start_date && trip.end_date;
+    const days = hasDates ? getDaysInRange(trip.start_date!, trip.end_date!) : [];
+
+    // Group items by date
+    const byDate: Record<string, TripItem[]> = {};
+    const undated: TripItem[] = [];
+
+    items.forEach(item => {
+      if (item.item_date) {
+        if (!byDate[item.item_date]) byDate[item.item_date] = [];
+        byDate[item.item_date].push(item);
+      } else {
+        undated.push(item);
+      }
+    });
+
+    const sections: { key: string; label: string; items: TripItem[]; date: string | null }[] = [];
+
+    if (hasDates) {
+      // Show all days in range
+      days.forEach(day => {
+        sections.push({
+          key: day,
+          label: formatDayLabel(day),
+          items: byDate[day] || [],
+          date: day,
+        });
+        delete byDate[day];
+      });
+      // Items with dates outside range
+      Object.keys(byDate).sort().forEach(day => {
+        sections.push({
+          key: day,
+          label: formatDayLabel(day),
+          items: byDate[day],
+          date: day,
+        });
+      });
+    } else {
+      // No trip dates — group by whatever item dates exist
+      Object.keys(byDate).sort().forEach(day => {
+        sections.push({
+          key: day,
+          label: formatDayLabel(day),
+          items: byDate[day],
+          date: day,
+        });
+      });
+    }
+
+    // Undated section at the bottom
+    if (undated.length > 0 || sections.length === 0) {
+      sections.push({
+        key: 'undated',
+        label: 'Undated',
+        items: undated,
+        date: null,
+      });
+    }
+
+    return sections;
+  }, [trip, items]);
+
+  const handleAddItemForDay = (date: string) => {
+    setAddingDate(date);
+    // Default to first category
+    setAddingCategory(CATEGORIES[0].id);
+  };
+
   const itemCount = items.length;
   const itemWord = itemCount === 1 ? 'item' : 'items';
 
@@ -143,7 +253,6 @@ const TripBoard = () => {
     return (
       <div className="min-h-screen page-transition" style={{ backgroundColor: '#faf7f2' }}>
         <div className="max-w-[480px] mx-auto pb-10">
-          {/* Header skeleton */}
           <div
             style={{
               background: 'linear-gradient(180deg, #1a3647 0%, #24495e 100%)',
@@ -157,7 +266,6 @@ const TripBoard = () => {
               <div className="h-4 w-32 rounded mt-3" style={{ backgroundColor: 'rgba(255,255,255,0.07)' }} />
             </div>
           </div>
-          {/* Category skeletons */}
           <div className="px-4 pt-6 flex flex-col gap-3">
             {[0,1,2,3,4].map(i => (
               <div
@@ -191,6 +299,8 @@ const TripBoard = () => {
     );
   }
 
+  const hasDateRange = trip.start_date && trip.end_date;
+
   return (
     <div className="min-h-screen page-transition" style={{ backgroundColor: '#faf7f2' }}>
       {showWelcome && (
@@ -211,7 +321,6 @@ const TripBoard = () => {
             padding: '52px 20px 28px',
           }}
         >
-          {/* Back arrow only */}
           <button
             onClick={() => navigate('/')}
             className="absolute font-body text-[13px] font-medium active:opacity-60"
@@ -219,7 +328,6 @@ const TripBoard = () => {
           >
             ←
           </button>
-          {/* Decorative emoji */}
           <div
             className="absolute select-none pointer-events-none"
             style={{ top: '10px', right: '10px', fontSize: '120px', opacity: 0.06, lineHeight: 1 }}
@@ -227,7 +335,6 @@ const TripBoard = () => {
             {trip.emoji}
           </div>
 
-          {/* Share button */}
           <button
             onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
             className="absolute font-body text-[13px] font-medium active:opacity-60 flex items-center gap-1"
@@ -236,13 +343,25 @@ const TripBoard = () => {
             <span style={{ fontSize: '12px' }}>↗</span> Share
           </button>
 
-          {/* Eyebrow */}
-          {trip.subtitle && (
-            <div
-              className="font-body text-[12px] font-medium uppercase mb-3"
-              style={{ letterSpacing: '2.5px', color: 'rgba(255,255,255,0.45)' }}
-            >
-              {trip.subtitle}
+          {/* Eyebrow: date range and/or subtitle */}
+          {(hasDateRange || trip.subtitle) && (
+            <div>
+              {hasDateRange && (
+                <div
+                  className="font-body text-[12px] font-medium uppercase"
+                  style={{ letterSpacing: '2.5px', color: 'rgba(255,255,255,0.45)', marginBottom: trip.subtitle ? '4px' : '12px' }}
+                >
+                  {formatDateRange(trip.start_date!, trip.end_date!)}
+                </div>
+              )}
+              {trip.subtitle && (
+                <div
+                  className="font-body text-[12px] font-medium uppercase mb-3"
+                  style={{ letterSpacing: '2.5px', color: 'rgba(255,255,255,0.45)' }}
+                >
+                  {trip.subtitle}
+                </div>
+              )}
             </div>
           )}
 
@@ -278,31 +397,84 @@ const TripBoard = () => {
           </div>
         </div>
 
-        {/* Collapse/expand all — right aligned */}
-        <div className="flex justify-end px-5 pt-4 pb-1">
-          <button
-            onClick={handleToggleAll}
-            className="font-body text-[13px] font-medium text-copper active:opacity-70"
-          >
-            {allCollapsed ? 'Expand all' : 'Collapse all'}
-          </button>
+        {/* View toggle + Collapse all */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-1">
+          {/* Left: view toggle */}
+          <div className="flex items-center gap-1.5 font-body text-[13px]">
+            <button
+              onClick={() => setViewMode('categories')}
+              className="active:opacity-70"
+              style={{
+                color: viewMode === 'categories' ? '#1a3647' : '#9aacb5',
+                fontWeight: viewMode === 'categories' ? 600 : 400,
+                background: 'none',
+                border: 'none',
+                padding: 0,
+              }}
+            >
+              Categories
+            </button>
+            <span style={{ color: '#9aacb5' }}>·</span>
+            <button
+              onClick={() => setViewMode('byday')}
+              className="active:opacity-70"
+              style={{
+                color: viewMode === 'byday' ? '#1a3647' : '#9aacb5',
+                fontWeight: viewMode === 'byday' ? 600 : 400,
+                background: 'none',
+                border: 'none',
+                padding: 0,
+              }}
+            >
+              By Day
+            </button>
+          </div>
+
+          {/* Right: collapse all (only in categories view) */}
+          {viewMode === 'categories' && (
+            <button
+              onClick={handleToggleAll}
+              className="font-body text-[13px] font-medium text-copper active:opacity-70"
+            >
+              {allCollapsed ? 'Expand all' : 'Collapse all'}
+            </button>
+          )}
         </div>
 
-        {/* Categories */}
-        <div className="px-4 flex flex-col gap-3">
-          {CATEGORIES.map((cat) => (
-             <CategorySection
-              key={cat.id}
-              category={cat}
-              items={items.filter(i => i.category === cat.id)}
-              collapsed={collapsed[cat.id] || false}
-              onToggle={() => setCollapsed(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
-              onAddItem={() => setAddingCategory(cat.id)}
-              onDeleteItem={handleDeleteItem}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </div>
+        {/* Categories View */}
+        {viewMode === 'categories' && (
+          <div className="px-4 flex flex-col gap-3">
+            {CATEGORIES.map((cat) => (
+              <CategorySection
+                key={cat.id}
+                category={cat}
+                items={items.filter(i => i.category === cat.id)}
+                collapsed={collapsed[cat.id] || false}
+                onToggle={() => setCollapsed(prev => ({ ...prev, [cat.id]: !prev[cat.id] }))}
+                onAddItem={() => { setAddingCategory(cat.id); setAddingDate(null); }}
+                onDeleteItem={handleDeleteItem}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* By Day View */}
+        {viewMode === 'byday' && (
+          <div className="px-4 flex flex-col gap-3">
+            {dayViewData.map((section) => (
+              <DaySection
+                key={section.key}
+                label={section.label}
+                items={section.items}
+                onDeleteItem={handleDeleteItem}
+                onStatusChange={handleStatusChange}
+                onAddItem={section.date ? () => handleAddItemForDay(section.date!) : undefined}
+                emptyHint={section.date ? 'nothing planned yet' : undefined}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Clear all */}
         {items.length > 0 && (
@@ -343,8 +515,11 @@ const TripBoard = () => {
         <AddItemSheet
           tripId={trip.id}
           category={CATEGORIES.find(c => c.id === addingCategory)!}
-          onClose={() => setAddingCategory(null)}
+          onClose={() => { setAddingCategory(null); setAddingDate(null); }}
           onItemAdded={handleItemAdded}
+          tripStartDate={trip.start_date}
+          tripEndDate={trip.end_date}
+          prefilledDate={addingDate}
         />
       )}
 
