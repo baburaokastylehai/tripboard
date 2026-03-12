@@ -452,7 +452,7 @@ const TripBoard = () => {
               transition: 'transform 0.2s ease',
             }}
           >
-            {shareCopied ? 'copied ✓' : 'share ↗'}
+            {shareCopied ? 'copied ✓' : <>share <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span></>}
           </button>
 
           {/* Eyebrow: date range and/or subtitle */}
