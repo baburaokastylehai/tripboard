@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
+import HowItWorksOverlay from '@/components/HowItWorksOverlay';
 
 interface SavedTrip {
   id: string;
