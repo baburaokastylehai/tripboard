@@ -19,45 +19,42 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
 
   const handleSave = async () => {
     const trimmedName = name.trim();
-    if (!trimmedName || saving) {
-      console.error('EditTripSheet: blocked save — name empty or already saving', { trimmedName, saving });
-      return;
-    }
+    if (!trimmedName || saving) return;
     setSaving(true);
 
     try {
-      const updatePayload = {
-        name: trimmedName,
-        subtitle: subtitle.trim(),
-        emoji,
-        start_date: startDate || null,
-        end_date: endDate || null,
-      };
-      console.log('EditTripSheet: saving with payload', updatePayload, 'tripId:', trip.id);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('trips')
-        .update(updatePayload)
-        .eq('id', trip.id)
-        .select()
-        .single();
+        .update({
+          name: trimmedName,
+          subtitle: subtitle.trim(),
+          emoji,
+          start_date: startDate || null,
+          end_date: endDate || null,
+        })
+        .eq('id', trip.id);
 
       if (error) {
-        console.error('EditTripSheet: Supabase update error', error);
+        console.error('Trip update failed:', error);
+        setSaving(false);
+        return;
       }
 
+      // Re-fetch fresh data
+      const { data } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('id', trip.id)
+        .single();
+
       if (data) {
-        console.log('EditTripSheet: save success', data);
         onUpdated(data);
-        onClose();
-      } else if (!error) {
-        console.error('EditTripSheet: no data returned, no error — closing anyway');
-        // Still close and refresh with local data
-        onUpdated({ ...trip, ...updatePayload });
-        onClose();
+      } else {
+        onUpdated({ ...trip, name: trimmedName, subtitle: subtitle.trim(), emoji, start_date: startDate || null, end_date: endDate || null });
       }
+      onClose();
     } catch (err) {
-      console.error('EditTripSheet: unexpected error', err);
+      console.error('Trip update failed:', err);
     } finally {
       setSaving(false);
     }
