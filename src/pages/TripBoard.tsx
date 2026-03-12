@@ -71,6 +71,7 @@ const TripBoard = () => {
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
   const [addingDate, setAddingDate] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const pollingIntervalRef = useRef<number | null>(null);
