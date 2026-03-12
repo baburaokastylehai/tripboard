@@ -138,16 +138,10 @@ const Landing = () => {
           <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
             group chats are for banter. trip links belong here.
           </p>
-          {/* Trip counter */}
-          {showCounter && (
-            <p className="font-body text-[13px] mt-3" style={{ color: '#c17c4e' }}>
-              {displayCount} trips created
-            </p>
-          )}
         </div>
 
         {/* Buttons */}
-        <div className="w-full flex flex-col gap-3">
+        <div className="w-full flex flex-col gap-3 items-center">
           <button
             type="button"
             onClick={() => navigate('/new')}
@@ -157,41 +151,40 @@ const Landing = () => {
             Create a Trip
           </button>
 
-          <p className="font-body text-[13px] text-center" style={{ color: '#9aacb5' }}>
-            already have a trip link? just open it - you're in.
-          </p>
+          {/* Trip counter as social proof */}
+          {showCounter && (
+            <p className="font-body text-[12px]" style={{ color: '#5cbf8a' }}>
+              {displayCount} trips created
+            </p>
+          )}
 
-          <button
-            onClick={() => setShowHowItWorks(true)}
-            className="font-body text-[13px] text-center tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none' }}
-          >
-            how it works ↗
-          </button>
+          {/* Combined helper line */}
+          <p className="font-body text-[13px] text-center">
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="tap-scale"
+              style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', fontSize: 'inherit', cursor: 'pointer' }}
+            >
+              how it works ↗
+            </button>
+            <span style={{ color: '#c8cfd3' }}>{' · '}</span>
+            <span style={{ color: '#9aacb5' }}>have a link? just open it.</span>
+          </p>
         </div>
 
-        {/* My Trips */}
-        {myTrips.length > 0 && (
-          <div className="w-full mt-12">
-            <div className="border-t border-dashed mb-5" style={{ borderColor: 'rgba(26,54,71,0.1)' }} />
-            <h2 className="font-display text-[20px] font-bold text-navy mb-4">My Trips</h2>
-            <div className="flex flex-col gap-3">
-              {myTrips.map((trip, i) => (
-                <TripCard key={trip.slug} trip={trip} tag="Created by you" index={i} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Trips */}
-        {recentTrips.length > 0 && (
+        {/* Your Trips */}
+        {allTrips.length > 0 && (
           <div className="w-full mt-8">
-            {myTrips.length === 0 && (
-              <div className="border-t border-dashed mb-5" style={{ borderColor: 'rgba(26,54,71,0.1)' }} />
-            )}
-            <h2 className="font-display text-[18px] font-bold text-navy mb-4" style={{ opacity: 0.7 }}>Recent Trips</h2>
-            <div className="flex flex-col gap-3">
-              {recentTrips.map((trip, i) => (
+            <h2 className="font-display text-[20px] font-bold text-navy mb-4">Your Trips</h2>
+            <div
+              className="flex flex-col gap-2.5 overflow-y-auto"
+              style={{
+                maxHeight: allTrips.length > 3 ? '220px' : 'none',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              {allTrips.map((trip, i) => (
                 <TripCard key={trip.slug} trip={trip} index={i} />
               ))}
             </div>
