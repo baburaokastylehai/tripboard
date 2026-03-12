@@ -66,7 +66,7 @@ const HowItWorksOverlay = ({ onClose }: Props) => {
 
         <div className="text-center" style={{ marginTop: '24px' }}>
           <p className="font-body text-[14px]" style={{ color: '#c17c4e' }}>
-            that's kind of it. ✦
+            that's kind of it.
           </p>
         </div>
       </div>
