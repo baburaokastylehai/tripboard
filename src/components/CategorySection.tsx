@@ -1,4 +1,5 @@
-import { TripItem } from '@/lib/supabase';
+import { useMemo } from 'react';
+import { TripItem, EMPTY_CATEGORY_LINES } from '@/lib/supabase';
 import ItemCard from '@/components/ItemCard';
 
 interface CategoryDef {
@@ -21,6 +22,13 @@ interface Props {
 const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onStatusChange, onItemTap }: Props) => {
   const isEmpty = items.length === 0;
   const bookedCount = items.filter(i => i.status === 'booked').length;
+
+  // Pick a random personality line on mount (stable per render cycle)
+  const personalityLine = useMemo(() => {
+    const lines = EMPTY_CATEGORY_LINES[category.id];
+    if (!lines || lines.length === 0) return null;
+    return lines[Math.floor(Math.random() * lines.length)];
+  }, [category.id]);
 
   return (
     <div>
@@ -71,6 +79,15 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
             borderBottom: '1px solid rgba(26,54,71,0.06)',
           }}
         >
+          {/* Personality line for empty categories */}
+          {isEmpty && personalityLine && (
+            <div
+              className="font-body text-[13px] text-center italic px-4"
+              style={{ color: '#9aacb5', paddingTop: '16px', paddingBottom: '8px' }}
+            >
+              {personalityLine}
+            </div>
+          )}
 
           {/* Horizontal scroll area */}
           <div
@@ -90,21 +107,38 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
               />
             ))}
 
-            {/* Add item card */}
-            <button
-              onClick={onAddItem}
-              className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper tap-scale"
-              style={{
-                width: '148px',
-                height: '148px',
-                border: '2px dashed rgba(26,54,71,0.1)',
-                borderRadius: '16px',
-                backgroundColor: 'transparent',
-              }}
-            >
-              <span className="text-[24px] mb-1 opacity-40">+</span>
-              Add item
-            </button>
+            {/* Add item card — smaller when empty */}
+            {isEmpty ? (
+              <button
+                onClick={onAddItem}
+                className="flex-shrink-0 flex items-center justify-center text-copper tap-scale"
+                style={{
+                  minWidth: '120px',
+                  padding: '14px',
+                  border: '1px dashed rgba(26,54,71,0.1)',
+                  borderRadius: '16px',
+                  backgroundColor: 'transparent',
+                  fontSize: '20px',
+                }}
+              >
+                +
+              </button>
+            ) : (
+              <button
+                onClick={onAddItem}
+                className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper tap-scale"
+                style={{
+                  width: '148px',
+                  height: '148px',
+                  border: '2px dashed rgba(26,54,71,0.1)',
+                  borderRadius: '16px',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <span className="text-[24px] mb-1 opacity-40">+</span>
+                Add item
+              </button>
+            )}
           </div>
         </div>
       )}

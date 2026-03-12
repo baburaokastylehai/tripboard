@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase, Trip, TripItem, CATEGORIES } from '@/lib/supabase';
+import { supabase, Trip, TripItem, CATEGORIES, normalizeCategoryId } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import WelcomePopup from '@/components/WelcomePopup';
@@ -13,6 +13,8 @@ import ItemDetailSheet from '@/components/ItemDetailSheet';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 import OfflineBanner from '@/components/OfflineBanner';
 import InstallPrompt from '@/components/InstallPrompt';
+import SmartLinkInput from '@/components/SmartLinkInput';
+import SharePromptBanner from '@/components/SharePromptBanner';
 
 const formatDateRange = (start: string, end: string) => {
   const s = new Date(start + 'T00:00:00');
@@ -56,6 +58,7 @@ const TripBoard = () => {
   const [items, setItems] = useState<TripItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Skip welcome if user already has a name
   const [showWelcome, setShowWelcome] = useState(() => {
     return !localStorage.getItem('tripboard-username');
   });
@@ -69,6 +72,7 @@ const TripBoard = () => {
   const pollingIntervalRef = useRef<number | null>(null);
   const [viewMode, setViewMode] = useState<'categories' | 'byday'>('categories');
   const [detailItem, setDetailItem] = useState<TripItem | null>(null);
+  const [isJustCreated, setIsJustCreated] = useState(false);
 
   const clearPollingInterval = useCallback(() => {
     if (pollingIntervalRef.current !== null) {
@@ -95,6 +99,14 @@ const TripBoard = () => {
     if (error) console.error('Fetch trip failed:', error);
     if (error || !data) { setNotFound(true); setLoading(false); return; }
     setTrip(data);
+
+    // Check if just created
+    const justCreatedKey = `tripboard-just-created-${data.id}`;
+    if (localStorage.getItem(justCreatedKey) === 'true') {
+      setIsJustCreated(true);
+      localStorage.removeItem(justCreatedKey);
+    }
+
     return data;
   }, [slug]);
 
@@ -106,7 +118,12 @@ const TripBoard = () => {
       .order('created_at', { ascending: false });
     if (error) console.error('Fetch items failed:', error);
     if (data) {
-      setItems(data);
+      // Normalize legacy category IDs
+      const normalized = data.map(item => ({
+        ...item,
+        category: normalizeCategoryId(item.category),
+      }));
+      setItems(normalized);
     }
   }, []);
 
@@ -201,7 +218,9 @@ const TripBoard = () => {
       .eq('trip_id', trip.id)
       .order('created_at', { ascending: false });
 
-    if (data) setItems(data);
+    if (data) {
+      setItems(data.map(item => ({ ...item, category: normalizeCategoryId(item.category) })));
+    }
 
     startPolling(trip.id);
   };
@@ -218,6 +237,11 @@ const TripBoard = () => {
     setAddingCategory(null);
     setAddingDate(null);
     trackEvent('item_added', { trip_id: trip?.id, category: item.category, type: item.type });
+  };
+
+  const handleSmartItemsAdded = (newItems: TripItem[]) => {
+    setItems(prev => [...newItems, ...prev]);
+    trackEvent('smart_links_added', { trip_id: trip?.id, count: newItems.length });
   };
 
   const handleTripUpdated = (updated: Trip) => {
@@ -239,7 +263,6 @@ const TripBoard = () => {
     const hasDates = trip.start_date && trip.end_date;
     const days = hasDates ? getDaysInRange(trip.start_date!, trip.end_date!) : [];
 
-    // Group items by date
     const byDate: Record<string, TripItem[]> = {};
     const undated: TripItem[] = [];
 
@@ -322,7 +345,7 @@ const TripBoard = () => {
             </div>
           </div>
           <div className="px-4 pt-6 flex flex-col gap-3">
-            {[0,1,2,3,4].map(i => (
+            {[0,1,2,3].map(i => (
               <div
                 key={i}
                 className="rounded-2xl animate-pulse-load"
@@ -391,12 +414,21 @@ const TripBoard = () => {
             {trip.emoji}
           </div>
 
+          {/* Share pill */}
           <button
             onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
-            className="absolute font-body text-[13px] font-medium active:opacity-60 flex items-center gap-1"
-            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 20px)', right: '20px', color: 'rgba(255,255,255,0.7)' }}
+            className="absolute font-body text-[13px] font-medium active:scale-95 transition-transform"
+            style={{
+              top: 'calc(env(safe-area-inset-top, 0px) + 20px)',
+              right: '20px',
+              color: '#fff',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              borderRadius: '20px',
+              padding: '8px 16px',
+              border: 'none',
+            }}
           >
-            <span style={{ fontSize: '12px' }}>↗</span> Share
+            share ↗
           </button>
 
           {/* Eyebrow: date range and/or subtitle */}
@@ -456,8 +488,34 @@ const TripBoard = () => {
         {/* Offline banner */}
         <OfflineBanner isOnline={isOnline} />
 
+        {/* Post-creation share prompt */}
+        {isJustCreated && trip && (
+          <div className="pt-4">
+            <SharePromptBanner
+              tripId={trip.id}
+              slug={trip.slug}
+              tripName={trip.name}
+              onShare={() => setShowShare(true)}
+            />
+          </div>
+        )}
+
+        {/* Smart link input */}
+        <div className="pt-4">
+          <SmartLinkInput
+            tripId={trip.id}
+            onItemsAdded={handleSmartItemsAdded}
+            isOnline={isOnline}
+          />
+        </div>
+
+        {/* Visual connector */}
+        <div className="text-center py-1">
+          <span className="font-body text-[14px]" style={{ color: '#c8cfd3', letterSpacing: '4px' }}>···</span>
+        </div>
+
         {/* View toggle + Collapse all */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-1">
+        <div className="flex items-center justify-between px-5 pb-1">
           {/* Left: view toggle */}
           <div className="flex items-center gap-1.5 font-body text-[13px]">
             <button
@@ -494,6 +552,7 @@ const TripBoard = () => {
             <button
               onClick={handleToggleAll}
               className="font-body text-[13px] font-medium text-copper active:opacity-70"
+              style={{ background: 'none', border: 'none', padding: 0 }}
             >
               {allCollapsed ? 'Expand all' : 'Collapse all'}
             </button>
@@ -502,7 +561,7 @@ const TripBoard = () => {
 
         {/* Categories View */}
         {viewMode === 'categories' && (
-          <div className="px-4 flex flex-col gap-3">
+          <div className="px-4 flex flex-col gap-[12px]">
             {CATEGORIES.map((cat) => (
               <CategorySection
                 key={cat.id}
@@ -520,7 +579,7 @@ const TripBoard = () => {
 
         {/* By Day View */}
         {viewMode === 'byday' && (
-          <div className="px-4 flex flex-col gap-3">
+          <div className="px-4 flex flex-col gap-[12px]">
             {dayViewData.map((section) => (
               <DaySection
                 key={section.key}
