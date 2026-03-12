@@ -220,7 +220,17 @@ const Landing = () => {
             className="font-body text-[11px] tap-scale"
             style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
           >
-            the story behind this ✦ share your thoughts
+            the story behind this{' '}
+            <span
+              ref={sparkleRef}
+              style={{
+                display: 'inline-block',
+                animation: sparkleAnimating ? 'sparklePulse 2s ease-in-out 3' : 'none',
+              }}
+            >
+              ✦
+            </span>
+            {' '}share your thoughts
           </button>
           <a
             href="https://fortheplot.today"
