@@ -96,33 +96,30 @@ const Landing = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  const TripCard = ({ trip, tag, index }: { trip: SavedTrip; tag?: string; index: number }) => (
+  const allTrips = [...myTrips, ...recentTrips.filter(t => !myTrips.some(m => m.id === t.id))];
+
+  const TripCard = ({ trip, index }: { trip: SavedTrip; index: number }) => (
     <button
       key={trip.slug}
       onClick={() => navigate(`/t/${trip.slug}`)}
-      className="w-full flex items-center gap-3 p-4 rounded-[14px] text-left tap-scale"
+      className="w-full flex items-center gap-3 text-left tap-scale"
       style={{
         backgroundColor: '#fff',
         border: '1px solid rgba(26,54,71,0.06)',
         boxShadow: '0 1px 4px rgba(26,54,71,0.07)',
+        borderRadius: '14px',
+        padding: '12px 16px',
         animation: `fadeSlideIn 0.3s ease ${index * 100}ms both`,
       }}
     >
-      <span className="text-[28px] flex-shrink-0">{trip.emoji}</span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-body text-[15px] font-semibold text-navy truncate">{trip.name}</span>
-          {tag && (
-            <span
-              className="flex-shrink-0 font-body text-[10px] font-medium uppercase px-1.5 py-0.5 rounded"
-              style={{ backgroundColor: 'rgba(193,124,78,0.1)', color: '#c17c4e', letterSpacing: '0.5px' }}
-            >
-              {tag}
-            </span>
-          )}
-        </div>
+      <span className="text-[24px] flex-shrink-0">{trip.emoji}</span>
+      <div className="min-w-0 flex-1 flex items-center gap-0">
+        <span className="font-body text-[14px] font-semibold text-navy truncate flex-shrink-0">{trip.name}</span>
         {trip.subtitle && (
-          <div className="font-body text-[13px] text-text-muted truncate">{trip.subtitle}</div>
+          <>
+            <span className="font-body text-[12px] mx-1.5 flex-shrink-0" style={{ color: '#c8cfd3' }}>·</span>
+            <span className="font-body text-[12px] truncate" style={{ color: '#9aacb5' }}>{trip.subtitle}</span>
+          </>
         )}
       </div>
     </button>
@@ -141,16 +138,10 @@ const Landing = () => {
           <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
             group chats are for banter. trip links belong here.
           </p>
-          {/* Trip counter */}
-          {showCounter && (
-            <p className="font-body text-[13px] mt-3" style={{ color: '#c17c4e' }}>
-              {displayCount} trips created
-            </p>
-          )}
         </div>
 
         {/* Buttons */}
-        <div className="w-full flex flex-col gap-3">
+        <div className="w-full flex flex-col gap-3 items-center">
           <button
             type="button"
             onClick={() => navigate('/new')}
@@ -160,41 +151,40 @@ const Landing = () => {
             Create a Trip
           </button>
 
-          <p className="font-body text-[13px] text-center" style={{ color: '#9aacb5' }}>
-            already have a trip link? just open it - you're in.
-          </p>
+          {/* Trip counter as social proof */}
+          {showCounter && (
+            <p className="font-body text-[12px]" style={{ color: '#5cbf8a' }}>
+              {displayCount} trips created
+            </p>
+          )}
 
-          <button
-            onClick={() => setShowHowItWorks(true)}
-            className="font-body text-[13px] text-center tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none' }}
-          >
-            how it works ↗
-          </button>
+          {/* Combined helper line */}
+          <p className="font-body text-[13px] text-center">
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="tap-scale"
+              style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', fontSize: 'inherit', cursor: 'pointer' }}
+            >
+              how it works ↗
+            </button>
+            <span style={{ color: '#c8cfd3' }}>{' · '}</span>
+            <span style={{ color: '#9aacb5' }}>have a link? just open it.</span>
+          </p>
         </div>
 
-        {/* My Trips */}
-        {myTrips.length > 0 && (
-          <div className="w-full mt-12">
-            <div className="border-t border-dashed mb-5" style={{ borderColor: 'rgba(26,54,71,0.1)' }} />
-            <h2 className="font-display text-[20px] font-bold text-navy mb-4">My Trips</h2>
-            <div className="flex flex-col gap-3">
-              {myTrips.map((trip, i) => (
-                <TripCard key={trip.slug} trip={trip} tag="Created by you" index={i} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Trips */}
-        {recentTrips.length > 0 && (
+        {/* Your Trips */}
+        {allTrips.length > 0 && (
           <div className="w-full mt-8">
-            {myTrips.length === 0 && (
-              <div className="border-t border-dashed mb-5" style={{ borderColor: 'rgba(26,54,71,0.1)' }} />
-            )}
-            <h2 className="font-display text-[18px] font-bold text-navy mb-4" style={{ opacity: 0.7 }}>Recent Trips</h2>
-            <div className="flex flex-col gap-3">
-              {recentTrips.map((trip, i) => (
+            <h2 className="font-display text-[20px] font-bold text-navy mb-4">Your Trips</h2>
+            <div
+              className="flex flex-col gap-2.5 overflow-y-auto"
+              style={{
+                maxHeight: allTrips.length > 3 ? '220px' : 'none',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              {allTrips.map((trip, i) => (
                 <TripCard key={trip.slug} trip={trip} index={i} />
               ))}
             </div>
