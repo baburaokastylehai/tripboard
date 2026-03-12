@@ -87,6 +87,25 @@ const Landing = () => {
     };
   }, []);
 
+  // Sparkle animation for new users
+  useEffect(() => {
+    const hasTrips = localStorage.getItem('tripboard-my-trips');
+    const sparklePlayed = localStorage.getItem('tripboard-sparkle-played');
+    const parsedTrips = hasTrips ? JSON.parse(hasTrips) : [];
+    if (sparklePlayed || parsedTrips.length > 0) return;
+
+    const timeout = setTimeout(() => {
+      setSparkleAnimating(true);
+      // Stop after 3 pulses (2s each = 6s)
+      setTimeout(() => {
+        setSparkleAnimating(false);
+        localStorage.setItem('tripboard-sparkle-played', 'true');
+      }, 6000);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   const TripCard = ({ trip, tag, index }: { trip: SavedTrip; tag?: string; index: number }) => (
     <button
       key={trip.slug}
