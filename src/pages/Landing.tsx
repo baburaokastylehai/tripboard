@@ -16,22 +16,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
-  const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [showHowItWorks, setShowHowItWorks] = useState(false);
-  const [tripCount, setTripCount] = useState(0);
-  const [displayCount, setDisplayCount] = useState(0);
-  const [showCounter, setShowCounter] = useState(false);
-  const [sparkleAnimating, setSparkleAnimating] = useState(false);
-  const sparkleRef = useRef<HTMLSpanElement>(null);
-
-  const handleGoToTrip = () => {
-    const trimmed = tripLink.trim();
-    if (!trimmed) return;
-    const match = trimmed.match(/\/t\/([^/?#]+)/);
-    const slug = match ? match[1] : trimmed;
-    navigate(`/t/${slug}`);
-  };
 
   const loadTrips = () => {
     try {
