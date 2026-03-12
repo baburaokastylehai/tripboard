@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
+import HowItWorksOverlay from '@/components/HowItWorksOverlay';
 
 interface SavedTrip {
   id: string;
@@ -13,22 +14,15 @@ interface SavedTrip {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [tripLink, setTripLink] = useState('');
-  const [showLinkInput, setShowLinkInput] = useState(false);
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [tripCount, setTripCount] = useState(0);
   const [displayCount, setDisplayCount] = useState(0);
   const [showCounter, setShowCounter] = useState(false);
-
-  const handleGoToTrip = () => {
-    const trimmed = tripLink.trim();
-    if (!trimmed) return;
-    const match = trimmed.match(/\/t\/([^/?#]+)/);
-    const slug = match ? match[1] : trimmed;
-    navigate(`/t/${slug}`);
-  };
+  const [sparkleAnimating, setSparkleAnimating] = useState(false);
+  const sparkleRef = useRef<HTMLSpanElement>(null);
 
   const loadTrips = () => {
     try {
@@ -81,6 +75,25 @@ const Landing = () => {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('pageshow', handleFocus);
     };
+  }, []);
+
+  // Sparkle animation for new users
+  useEffect(() => {
+    const hasTrips = localStorage.getItem('tripboard-my-trips');
+    const sparklePlayed = localStorage.getItem('tripboard-sparkle-played');
+    const parsedTrips = hasTrips ? JSON.parse(hasTrips) : [];
+    if (sparklePlayed || parsedTrips.length > 0) return;
+
+    const timeout = setTimeout(() => {
+      setSparkleAnimating(true);
+      // Stop after 3 pulses (2s each = 6s)
+      setTimeout(() => {
+        setSparkleAnimating(false);
+        localStorage.setItem('tripboard-sparkle-played', 'true');
+      }, 6000);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const TripCard = ({ trip, tag, index }: { trip: SavedTrip; tag?: string; index: number }) => (
@@ -147,50 +160,17 @@ const Landing = () => {
             Create a Trip
           </button>
 
-          {!showLinkInput ? (
-            <button
-              type="button"
-              onClick={() => setShowLinkInput(true)}
-              className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
-              style={{
-                backgroundColor: 'transparent',
-                color: '#1a3647',
-                border: '1.5px solid rgba(26,54,71,0.12)',
-              }}
-            >
-              I have a trip link
-            </button>
-          ) : (
-            <div
-              className="w-full flex gap-2 animate-fadeSlideIn"
-            >
-              <input
-                type="text"
-                placeholder="paste your trip link here..."
-                value={tripLink}
-                onChange={(e) => setTripLink(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGoToTrip()}
-                className="flex-1 px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none transition-colors"
-                style={{
-                  border: '1.5px solid rgba(26,54,71,0.12)',
-                  backgroundColor: '#fff',
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={handleGoToTrip}
-                disabled={!tripLink.trim()}
-                className="px-5 py-[14px] rounded-xl font-body text-[14px] font-semibold tap-scale disabled:opacity-40"
-                style={{ backgroundColor: '#c17c4e', color: '#fff' }}
-              >
-                Go
-              </button>
-            </div>
-          )}
-          <p className="font-body text-[12px] text-text-muted text-center mt-1">
-            Or just open a shared trip link — it'll take you straight there.
+          <p className="font-body text-[13px] text-center" style={{ color: '#9aacb5' }}>
+            already have a trip link? just open it — you're in.
           </p>
+
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="font-body text-[13px] text-center tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none' }}
+          >
+            how it works ↗
+          </button>
         </div>
 
         {/* My Trips */}
@@ -230,7 +210,17 @@ const Landing = () => {
             className="font-body text-[11px] tap-scale"
             style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
           >
-            the story behind this ✦ share your thoughts
+            the story behind this{' '}
+            <span
+              ref={sparkleRef}
+              style={{
+                display: 'inline-block',
+                animation: sparkleAnimating ? 'sparklePulse 2s ease-in-out 3' : 'none',
+              }}
+            >
+              ✦
+            </span>
+            {' '}share your thoughts
           </button>
           <a
             href="https://fortheplot.today"
@@ -246,6 +236,9 @@ const Landing = () => {
 
       {showFeedback && (
         <FeedbackOverlay onClose={() => setShowFeedback(false)} />
+      )}
+      {showHowItWorks && (
+        <HowItWorksOverlay onClose={() => setShowHowItWorks(false)} />
       )}
     </div>
   );

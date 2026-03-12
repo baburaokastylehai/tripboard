@@ -52,13 +52,15 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
           >
             {category.name}
           </div>
-          <div className="font-body text-[12px] text-text-muted">
-            {category.subtitle} · {items.length} item{items.length !== 1 ? 's' : ''}
+        </div>
+        {items.length > 0 && (
+          <span className="font-body text-[12px] flex-shrink-0 mr-2" style={{ color: '#9aacb5' }}>
+            {items.length}
             {bookedCount > 0 && (
               <span style={{ color: '#5cbf8a' }}> · {bookedCount} booked</span>
             )}
-          </div>
-        </div>
+          </span>
+        )}
         <span
           className="text-[14px] text-text-muted flex-shrink-0 transition-transform duration-200"
           style={{ transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}

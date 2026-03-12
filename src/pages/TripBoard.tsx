@@ -71,6 +71,7 @@ const TripBoard = () => {
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
   const [addingDate, setAddingDate] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const pollingIntervalRef = useRef<number | null>(null);
@@ -420,8 +421,25 @@ const TripBoard = () => {
 
           {/* Share pill */}
           <button
-            onClick={() => { setShowShare(true); trackEvent('share_opened', { trip_id: trip.id }); }}
-            className="absolute font-body text-[13px] font-medium active:scale-95 transition-transform"
+            onClick={async () => {
+              trackEvent('share_opened', { trip_id: trip.id });
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: trip.name || 'TripBoard',
+                    text: 'Join our trip on TripBoard',
+                    url: `${window.location.origin}/t/${trip.slug}`,
+                  });
+                } catch (err) {
+                  if ((err as Error).name === 'AbortError') return;
+                }
+              } else {
+                await navigator.clipboard.writeText(`${window.location.origin}/t/${trip.slug}`);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+              }
+            }}
+            className="absolute font-body text-[13px] font-medium transition-transform"
             style={{
               top: 'calc(env(safe-area-inset-top, 0px) + 20px)',
               right: '20px',
@@ -430,9 +448,11 @@ const TripBoard = () => {
               borderRadius: '20px',
               padding: '8px 16px',
               border: 'none',
+              transform: shareCopied ? 'scale(0.95)' : 'scale(1)',
+              transition: 'transform 0.2s ease',
             }}
           >
-            share ↗
+            {shareCopied ? 'copied ✓' : 'share ↗'}
           </button>
 
           {/* Eyebrow: date range and/or subtitle */}
