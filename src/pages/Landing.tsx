@@ -140,8 +140,8 @@ const Landing = () => {
           </p>
         </div>
 
-        {/* Buttons */}
-        <div className="w-full flex flex-col gap-3 items-center">
+        {/* CTA */}
+        <div className="w-full flex flex-col items-center gap-4">
           <button
             type="button"
             onClick={() => navigate('/new')}
@@ -151,25 +151,14 @@ const Landing = () => {
             Create a Trip
           </button>
 
-          {/* Trip counter as social proof */}
-          {showCounter && (
-            <p className="font-body text-[12px]" style={{ color: '#5cbf8a' }}>
-              {displayCount} trips created
-            </p>
-          )}
-
-          {/* Combined helper line */}
-          <p className="font-body text-[13px] text-center">
-            <button
-              onClick={() => setShowHowItWorks(true)}
-              className="tap-scale"
-              style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', fontSize: 'inherit', cursor: 'pointer' }}
-            >
-              how it works ↗
-            </button>
-            <span style={{ color: '#c8cfd3' }}>{' · '}</span>
-            <span style={{ color: '#9aacb5' }}>have a link? just open it.</span>
-          </p>
+          {/* Context line */}
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="font-body text-[13px] tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
+          >
+            how it works ↗
+          </button>
         </div>
 
         {/* Your Trips */}
@@ -195,10 +184,16 @@ const Landing = () => {
 
         {/* Footer */}
         <div className="pt-10 pb-4 flex flex-col items-center gap-2">
+          {/* Trip counter - ambient stat */}
+          {showCounter && (
+            <p className="font-body text-[11px]" style={{ color: '#5cbf8a' }}>
+              {displayCount} trips created
+            </p>
+          )}
           <button
             onClick={() => setShowFeedback(true)}
             className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: '8px' }}
           >
             the story behind this{' '}
             <span
@@ -217,7 +212,7 @@ const Landing = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-[11px] tracking-[1px] active:opacity-100 tap-scale"
-            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7 }}
+            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7, marginTop: '8px' }}
           >
             fortheplot.today
           </a>
