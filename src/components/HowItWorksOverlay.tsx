@@ -54,19 +54,19 @@ const HowItWorksOverlay = ({ onClose }: Props) => {
 
         <div className="text-center flex flex-col gap-4" style={{ marginTop: '28px' }}>
           <p className="font-body text-[14px]" style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-            you create a trip and share the link with your group.
+            your group's planning a trip. the chat's flying - hotel links, restaurant recs, 'has anyone booked the flights yet?' you know how it goes.
           </p>
           <p className="font-body text-[14px]" style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-            everyone drops their bookings, restaurant finds, and activity links.
+            tripboard gives all of that a home. one link, one board. drop a url and it files itself - stay, food, things to do.
           </p>
           <p className="font-body text-[14px]" style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-            paste a link — tripboard auto-sorts it into the right category.
+            mark what's booked, see what's still a maybe. when the trip gets close, switch to the day view and everything's there.
           </p>
         </div>
 
         <div className="text-center" style={{ marginTop: '24px' }}>
           <p className="font-body text-[14px]" style={{ color: '#c17c4e' }}>
-            one board. the whole trip. ✦
+            that's kind of it. ✦
           </p>
         </div>
       </div>

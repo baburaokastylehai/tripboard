@@ -161,7 +161,7 @@ const Landing = () => {
           </button>
 
           <p className="font-body text-[13px] text-center" style={{ color: '#9aacb5' }}>
-            already have a trip link? just open it — you're in.
+            already have a trip link? just open it - you're in.
           </p>
 
           <button
