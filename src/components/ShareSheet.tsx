@@ -70,7 +70,7 @@ const ShareSheet = ({ slug, tripName, onClose }: Props) => {
           className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold transition-opacity active:opacity-80"
           style={{ backgroundColor: '#c17c4e', color: '#fff' }}
         >
-          {navigator.share ? 'Share' : (copied ? 'Copied!' : 'Copy Link')}
+          {navigator.share ? 'Share' : (copied ? 'Copying...' : 'Copy')}
         </button>
 
         <p className="font-body text-[13px] text-text-muted text-center mt-3">
