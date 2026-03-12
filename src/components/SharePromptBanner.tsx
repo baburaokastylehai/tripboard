@@ -77,7 +77,7 @@ const SharePromptBanner = ({ tripId, slug, tripName, onShare }: Props) => {
           border: 'none',
         }}
       >
-        share the link ↗
+        share the link <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span>
       </button>
     </div>
   );

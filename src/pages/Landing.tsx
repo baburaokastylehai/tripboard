@@ -166,7 +166,7 @@ const Landing = () => {
             className="font-body text-[12px] tap-scale"
             style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer', marginTop: '14px' }}
           >
-            how it works ↗
+            how it works <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span>
           </button>
         </div>
 
