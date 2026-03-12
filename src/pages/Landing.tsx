@@ -195,7 +195,7 @@ const Landing = () => {
           {/* Trip counter */}
           {showCounter && (
             <p className="font-body text-[11px] text-center" style={{ color: '#5cbf8a', marginTop: allTrips.length > 0 ? '24px' : '0px' }}>
-              · {displayCount} trips created ·
+              · {displayCount} trips created across tripboard ·
             </p>
           )}
 
