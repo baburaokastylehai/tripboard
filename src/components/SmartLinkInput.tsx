@@ -185,6 +185,7 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
         padding: '16px',
         boxShadow: '0 2px 8px rgba(26,54,71,0.06)',
         border: '1.5px solid rgba(26,54,71,0.08)',
+        borderLeft: '3px solid rgba(193,124,78,0.3)',
         margin: '0 16px 16px',
       }}
     >
@@ -194,7 +195,7 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
         onChange={(e) => setText(e.target.value)}
         placeholder="paste a link - or a few, we'll sort them out"
         rows={1}
-        className="w-full font-body text-[15px] text-navy placeholder:text-[#c8cfd3] outline-none resize-none"
+        className="w-full font-body text-[15px] text-navy placeholder:text-[#9aacb5] outline-none resize-none"
         style={{
           backgroundColor: 'transparent',
           border: 'none',
