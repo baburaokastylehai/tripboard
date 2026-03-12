@@ -184,10 +184,16 @@ const Landing = () => {
 
         {/* Footer */}
         <div className="pt-10 pb-4 flex flex-col items-center gap-2">
+          {/* Trip counter - ambient stat */}
+          {showCounter && (
+            <p className="font-body text-[11px]" style={{ color: '#5cbf8a' }}>
+              {displayCount} trips created
+            </p>
+          )}
           <button
             onClick={() => setShowFeedback(true)}
             className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: '8px' }}
           >
             the story behind this{' '}
             <span
@@ -206,7 +212,7 @@ const Landing = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-[11px] tracking-[1px] active:opacity-100 tap-scale"
-            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7 }}
+            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7, marginTop: '8px' }}
           >
             fortheplot.today
           </a>
