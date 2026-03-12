@@ -19,6 +19,15 @@ interface Props {
   isOnline?: boolean;
 }
 
+const extractHostnameTitle = (url: string): string => {
+  try {
+    const h = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+    return h.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+};
+
 const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, tripEndDate, prefilledDate, isOnline = true }: Props) => {
   const [type, setType] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -41,20 +50,30 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
     reader.readAsDataURL(file);
   };
 
+  // For links, URL is required; title is optional (auto-fills from domain)
+  const canSubmitLink = type === 'link' && url.trim();
+  const canSubmitOther = type && type !== 'link' && title.trim();
+  const canSubmit = (canSubmitLink || canSubmitOther) && !submitting;
+
   const handleSubmit = async () => {
-    if (!title.trim() || !type || submitting) return;
+    if (!canSubmit) return;
     setSubmitting(true);
 
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const addedByName = localStorage.getItem('tripboard-username') || 'Anonymous';
     const createdAt = Date.now();
 
+    // For links, auto-generate title from domain if not provided
+    const finalTitle = type === 'link'
+      ? (title.trim() || extractHostnameTitle(url.trim()))
+      : title.trim();
+
     const newItem: TripItem = {
       id,
       trip_id: tripId,
       category: category.id,
-      type,
-      title: title.trim(),
+      type: type!,
+      title: finalTitle,
       url: type === 'link' ? url.trim() : null,
       content: type === 'note' ? content.trim() : null,
       file_data: type === 'file' ? fileData : null,
@@ -148,28 +167,45 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
               ← Back
             </button>
 
-            <input
-              type="text"
-              placeholder="Give it a name..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-[14px] font-body text-[16px] text-navy placeholder:text-text-muted outline-none mb-3"
-              style={inputStyle}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              autoFocus
-            />
-
+            {/* LINK: URL first, then optional title */}
             {type === 'link' && (
+              <>
+                <input
+                  type="url"
+                  placeholder="paste your link"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="w-full px-4 py-[14px] font-body text-[15px] text-navy placeholder:text-text-muted outline-none mb-3"
+                  style={inputStyle}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  autoFocus
+                />
+                <input
+                  type="text"
+                  placeholder="give it a name (optional)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-4 py-[14px] font-body text-[15px] text-navy placeholder:text-text-muted outline-none mb-3"
+                  style={inputStyle}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                />
+              </>
+            )}
+
+            {/* NOTE & FILE: title first */}
+            {type !== 'link' && (
               <input
-                type="url"
-                placeholder="Paste URL here..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="w-full px-4 py-[14px] font-body text-[15px] text-navy placeholder:text-text-muted outline-none mb-3"
+                type="text"
+                placeholder="Give it a name..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-[14px] font-body text-[16px] text-navy placeholder:text-text-muted outline-none mb-3"
                 style={inputStyle}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
+                autoFocus
               />
             )}
 
@@ -241,11 +277,11 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
 
             <button
               onClick={handleSubmit}
-              disabled={!title.trim() || submitting || !isOnline}
+              disabled={!canSubmit || !isOnline}
               className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold mt-1 transition-opacity active:opacity-80 disabled:cursor-not-allowed"
               style={{
-                backgroundColor: (title.trim() && isOnline) ? '#1a3647' : '#d0d5d8',
-                color: (title.trim() && isOnline) ? '#faf7f2' : '#fff',
+                backgroundColor: (canSubmit && isOnline) ? '#1a3647' : '#d0d5d8',
+                color: (canSubmit && isOnline) ? '#faf7f2' : '#fff',
               }}
             >
               {submitting ? 'Adding...' : `Add to ${category.name}`}

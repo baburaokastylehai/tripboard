@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import FeedbackOverlay from '@/components/FeedbackOverlay';
 
 interface SavedTrip {
@@ -17,6 +18,9 @@ const Landing = () => {
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [tripCount, setTripCount] = useState(0);
+  const [displayCount, setDisplayCount] = useState(0);
+  const [showCounter, setShowCounter] = useState(false);
 
   const handleGoToTrip = () => {
     const trimmed = tripLink.trim();
@@ -37,6 +41,36 @@ const Landing = () => {
       setRecentTrips(visitedList.filter((t: SavedTrip) => !myIds.has(t.id)));
     } catch {}
   };
+
+  // Fetch trip count
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count, error } = await supabase
+        .from('trips')
+        .select('*', { count: 'exact', head: true });
+      if (!error && count !== null && count >= 5) {
+        setTripCount(count);
+        setShowCounter(true);
+      }
+    };
+    fetchCount();
+  }, []);
+
+  // Animate counter
+  useEffect(() => {
+    if (!showCounter || tripCount === 0) return;
+    const duration = 500;
+    const startTime = Date.now();
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayCount(Math.floor(eased * tripCount));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [showCounter, tripCount]);
 
   useEffect(() => {
     loadTrips();
@@ -94,6 +128,12 @@ const Landing = () => {
           <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed">
             group chats are for banter. trip links deserve better.
           </p>
+          {/* Trip counter */}
+          {showCounter && (
+            <p className="font-body text-[13px] mt-3" style={{ color: '#c17c4e' }}>
+              {displayCount} trips created
+            </p>
+          )}
         </div>
 
         {/* Buttons */}

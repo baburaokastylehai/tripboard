@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, EMOJI_OPTIONS } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
+import { identifyUser } from '@/lib/posthog';
 import TripDatePicker from '@/components/TripDatePicker';
 
 const CreateTrip = () => {
   const navigate = useNavigate();
+  const [yourName, setYourName] = useState(() => localStorage.getItem('tripboard-username') || '');
   const [emoji, setEmoji] = useState('🏝');
   const [name, setName] = useState('');
   const [subtitle, setSubtitle] = useState('');
@@ -17,6 +19,12 @@ const CreateTrip = () => {
   const handleCreate = async () => {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
+
+    // Save creator name
+    if (yourName.trim()) {
+      localStorage.setItem('tripboard-username', yourName.trim());
+      identifyUser(yourName.trim());
+    }
 
     try {
       const { data, error } = await supabase
@@ -37,8 +45,10 @@ const CreateTrip = () => {
       saved.push({ id: data.id, slug: data.slug, name: data.name, emoji: data.emoji, subtitle: data.subtitle });
       localStorage.setItem('tripboard-my-trips', JSON.stringify(saved));
 
+      // Mark as just-created for the share prompt
+      localStorage.setItem(`tripboard-just-created-${data.id}`, 'true');
+
       trackEvent('trip_created', { trip_id: data.id, trip_name: data.name, emoji: data.emoji });
-      // Use replace so back button goes to / not /new
       navigate(`/t/${data.slug}`, { replace: true });
     } catch (err) {
       console.error('Failed to create trip:', err);
@@ -99,6 +109,18 @@ const CreateTrip = () => {
 
         {/* Form */}
         <div className="flex flex-col gap-3">
+          {/* Your name */}
+          <input
+            type="text"
+            placeholder="your name"
+            value={yourName}
+            onChange={(e) => setYourName(e.target.value)}
+            className="w-full px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none transition-colors"
+            style={inputStyle}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+
           <input
             type="text"
             placeholder="Catalina Weekend"
