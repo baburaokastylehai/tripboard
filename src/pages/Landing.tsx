@@ -135,63 +135,76 @@ const Landing = () => {
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
         }}
       >
-        {/* Top section — vertically centered in available space */}
-        <div className={`w-full flex flex-col items-center justify-center ${allTrips.length === 0 ? 'flex-1' : ''}`}
-          style={{ paddingTop: allTrips.length > 0 ? 'max(env(safe-area-inset-top, 0px), 60px)' : undefined }}
+        {/* GROUP 1 — IDENTITY: upper-center, not dead-center */}
+        <div
+          className="w-full flex flex-col items-center"
+          style={{ paddingTop: '15vh' }}
         >
           <div className="text-center">
-            <div className="text-[60px] leading-none mb-4 animate-gentle-float">🗺</div>
-            <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight">TripBoard</h1>
-            <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
+            <div className="text-[60px] leading-none animate-gentle-float">🗺</div>
+            <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight mt-2">TripBoard</h1>
+            <p className="font-body text-[15px] text-text-muted mt-1.5 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
               group chats are for banter. trip links belong here.
             </p>
           </div>
-
-          <div className="w-full flex flex-col items-center mt-10">
-            <button
-              type="button"
-              onClick={() => navigate('/new')}
-              className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
-              style={{ backgroundColor: '#1a3647', color: '#faf7f2' }}
-            >
-              Create a Trip
-            </button>
-
-            <button
-              onClick={() => setShowHowItWorks(true)}
-              className="font-body text-[12px] tap-scale mt-3"
-              style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
-            >
-              how it works ↗
-            </button>
-          </div>
         </div>
 
-        {/* Your Trips */}
-        {allTrips.length > 0 && (
-          <div className="w-full mt-12">
-            <h2 className="font-display text-[18px] font-bold text-navy mb-4">Your Trips</h2>
-            <div
-              className="flex flex-col gap-2.5 overflow-y-auto"
-              style={{
-                maxHeight: allTrips.length > 3 ? '200px' : 'none',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}
-            >
-              {allTrips.map((trip, i) => (
-                <TripCard key={trip.slug} trip={trip} index={i} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* 48px gap between Group 1 and Group 2 */}
+        {/* GROUP 2 — ACTION */}
+        <div className="w-full flex flex-col items-center mt-12">
+          <button
+            type="button"
+            onClick={() => navigate('/new')}
+            className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
+            style={{ backgroundColor: '#1a3647', color: '#faf7f2' }}
+          >
+            Create a Trip
+          </button>
 
-        {/* Footer — sits naturally after content */}
-        <div className="w-full flex flex-col items-center mt-8 pt-0">
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="font-body text-[12px] tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer', marginTop: '14px' }}
+          >
+            how it works ↗
+          </button>
+        </div>
+
+        {/* 48px gap between Group 2 and Group 3 */}
+        {/* GROUP 3 — CONTEXT */}
+        <div className="w-full flex flex-col items-center mt-12">
+          {/* Your Trips — only when trips exist */}
+          {allTrips.length > 0 && (
+            <>
+              <h2 className="font-display text-[16px] font-bold text-navy w-full">Your Trips</h2>
+              <div
+                className="w-full flex flex-col gap-2.5 overflow-y-auto mt-2.5"
+                style={{
+                  maxHeight: allTrips.length > 3 ? '200px' : 'none',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {allTrips.map((trip, i) => (
+                  <TripCard key={trip.slug} trip={trip} index={i} />
+                ))}
+              </div>
+              <div style={{ height: '24px' }} />
+            </>
+          )}
+
+          {/* Trip counter — only show when count > 10 */}
+          {showCounter && tripCount > 10 && (
+            <p className="font-body text-[11px] text-center" style={{ color: '#5cbf8a' }}>
+              · {displayCount} trips created ·
+            </p>
+          )}
+
+          {/* Footer items */}
           <button
             onClick={() => setShowFeedback(true)}
             className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: showCounter && tripCount > 10 ? '10px' : '0px' }}
           >
             the story behind this{' '}
             <span
@@ -209,8 +222,8 @@ const Landing = () => {
             href="https://fortheplot.today"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-body text-[10px] tracking-[1px] active:opacity-100 tap-scale mt-1.5"
-            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7 }}
+            className="font-body text-[10px] tracking-[1px] active:opacity-100 tap-scale"
+            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7, marginTop: '6px' }}
           >
             fortheplot.today
           </a>
