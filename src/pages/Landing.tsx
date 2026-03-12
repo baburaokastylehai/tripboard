@@ -17,6 +17,12 @@ const Landing = () => {
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [tripCount, setTripCount] = useState(0);
+  const [displayCount, setDisplayCount] = useState(0);
+  const [showCounter, setShowCounter] = useState(false);
+  const [sparkleAnimating, setSparkleAnimating] = useState(false);
+  const sparkleRef = useRef<HTMLSpanElement>(null);
 
   const loadTrips = () => {
     try {
