@@ -13,7 +13,9 @@ const ShareSheet = ({ slug, tripName, onClose }: Props) => {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(url);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => {
+      onClose();
+    }, 400);
   };
 
   const handleShare = async () => {
@@ -31,7 +33,7 @@ const ShareSheet = ({ slug, tripName, onClose }: Props) => {
         if ((err as Error).name === 'AbortError') return;
       }
     }
-    // Fallback: just copy
+    // Fallback: copy and close
     handleCopy();
   };
 
