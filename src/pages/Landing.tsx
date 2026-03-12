@@ -218,6 +218,9 @@ const Landing = () => {
       {showFeedback && (
         <FeedbackOverlay onClose={() => setShowFeedback(false)} />
       )}
+      {showHowItWorks && (
+        <HowItWorksOverlay onClose={() => setShowHowItWorks(false)} />
+      )}
     </div>
   );
 };
