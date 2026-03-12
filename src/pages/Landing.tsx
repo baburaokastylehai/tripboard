@@ -128,47 +128,53 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col items-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
       <div
-        className="w-full max-w-[480px] px-5 pb-10 flex flex-col items-center flex-1"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 96px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)' }}
+        className="w-full max-w-[480px] px-5 flex flex-col items-center"
+        style={{
+          minHeight: '100dvh',
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
+        }}
       >
-        {/* Hero */}
-        <div className="text-center mb-10">
-          <div className="text-[60px] leading-none mb-4 animate-gentle-float">🗺</div>
-          <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight">TripBoard</h1>
-          <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
-            group chats are for banter. trip links belong here.
-          </p>
-        </div>
+        {/* Top section — vertically centered in available space */}
+        <div className={`w-full flex flex-col items-center justify-center ${allTrips.length === 0 ? 'flex-1' : ''}`}
+          style={{ paddingTop: allTrips.length > 0 ? 'max(env(safe-area-inset-top, 0px), 60px)' : undefined }}
+        >
+          <div className="text-center">
+            <div className="text-[60px] leading-none mb-4 animate-gentle-float">🗺</div>
+            <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight">TripBoard</h1>
+            <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
+              group chats are for banter. trip links belong here.
+            </p>
+          </div>
 
-        {/* CTA */}
-        <div className="w-full flex flex-col items-center gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/new')}
-            className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
-            style={{ backgroundColor: '#1a3647', color: '#faf7f2' }}
-          >
-            Create a Trip
-          </button>
+          <div className="w-full flex flex-col items-center mt-10">
+            <button
+              type="button"
+              onClick={() => navigate('/new')}
+              className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
+              style={{ backgroundColor: '#1a3647', color: '#faf7f2' }}
+            >
+              Create a Trip
+            </button>
 
-          {/* Context line */}
-          <button
-            onClick={() => setShowHowItWorks(true)}
-            className="font-body text-[13px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
-          >
-            how it works ↗
-          </button>
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="font-body text-[12px] tap-scale mt-3"
+              style={{ color: '#c17c4e', background: 'none', border: 'none', font: 'inherit', cursor: 'pointer' }}
+            >
+              how it works ↗
+            </button>
+          </div>
         </div>
 
         {/* Your Trips */}
         {allTrips.length > 0 && (
-          <div className="w-full mt-8">
-            <h2 className="font-display text-[20px] font-bold text-navy mb-4">Your Trips</h2>
+          <div className="w-full mt-12">
+            <h2 className="font-display text-[18px] font-bold text-navy mb-4">Your Trips</h2>
             <div
               className="flex flex-col gap-2.5 overflow-y-auto"
               style={{
-                maxHeight: allTrips.length > 3 ? '220px' : 'none',
+                maxHeight: allTrips.length > 3 ? '200px' : 'none',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
               }}
@@ -180,20 +186,12 @@ const Landing = () => {
           </div>
         )}
 
-        <div className="flex-1" />
-
-        {/* Footer */}
-        <div className="pt-10 pb-4 flex flex-col items-center gap-2">
-          {/* Trip counter - ambient stat */}
-          {showCounter && (
-            <p className="font-body text-[11px]" style={{ color: '#5cbf8a' }}>
-              {displayCount} trips created
-            </p>
-          )}
+        {/* Footer — sits naturally after content */}
+        <div className="w-full flex flex-col items-center mt-8 pt-0">
           <button
             onClick={() => setShowFeedback(true)}
             className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: '8px' }}
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px' }}
           >
             the story behind this{' '}
             <span
@@ -211,8 +209,8 @@ const Landing = () => {
             href="https://fortheplot.today"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-body text-[11px] tracking-[1px] active:opacity-100 tap-scale"
-            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7, marginTop: '8px' }}
+            className="font-body text-[10px] tracking-[1px] active:opacity-100 tap-scale mt-1.5"
+            style={{ color: '#c8cfd3', textDecoration: 'none', opacity: 0.7 }}
           >
             fortheplot.today
           </a>
