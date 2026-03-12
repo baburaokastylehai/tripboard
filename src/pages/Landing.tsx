@@ -14,9 +14,8 @@ interface SavedTrip {
 
 const Landing = () => {
   const navigate = useNavigate();
-  const [tripLink, setTripLink] = useState('');
-  const [showLinkInput, setShowLinkInput] = useState(false);
   const [myTrips, setMyTrips] = useState<SavedTrip[]>([]);
+  const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [recentTrips, setRecentTrips] = useState<SavedTrip[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
