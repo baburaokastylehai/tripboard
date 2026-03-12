@@ -96,33 +96,30 @@ const Landing = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  const TripCard = ({ trip, tag, index }: { trip: SavedTrip; tag?: string; index: number }) => (
+  const allTrips = [...myTrips, ...recentTrips.filter(t => !myTrips.some(m => m.id === t.id))];
+
+  const TripCard = ({ trip, index }: { trip: SavedTrip; index: number }) => (
     <button
       key={trip.slug}
       onClick={() => navigate(`/t/${trip.slug}`)}
-      className="w-full flex items-center gap-3 p-4 rounded-[14px] text-left tap-scale"
+      className="w-full flex items-center gap-3 text-left tap-scale"
       style={{
         backgroundColor: '#fff',
         border: '1px solid rgba(26,54,71,0.06)',
         boxShadow: '0 1px 4px rgba(26,54,71,0.07)',
+        borderRadius: '14px',
+        padding: '12px 16px',
         animation: `fadeSlideIn 0.3s ease ${index * 100}ms both`,
       }}
     >
-      <span className="text-[28px] flex-shrink-0">{trip.emoji}</span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-body text-[15px] font-semibold text-navy truncate">{trip.name}</span>
-          {tag && (
-            <span
-              className="flex-shrink-0 font-body text-[10px] font-medium uppercase px-1.5 py-0.5 rounded"
-              style={{ backgroundColor: 'rgba(193,124,78,0.1)', color: '#c17c4e', letterSpacing: '0.5px' }}
-            >
-              {tag}
-            </span>
-          )}
-        </div>
+      <span className="text-[24px] flex-shrink-0">{trip.emoji}</span>
+      <div className="min-w-0 flex-1 flex items-center gap-0">
+        <span className="font-body text-[14px] font-semibold text-navy truncate flex-shrink-0">{trip.name}</span>
         {trip.subtitle && (
-          <div className="font-body text-[13px] text-text-muted truncate">{trip.subtitle}</div>
+          <>
+            <span className="font-body text-[12px] mx-1.5 flex-shrink-0" style={{ color: '#c8cfd3' }}>·</span>
+            <span className="font-body text-[12px] truncate" style={{ color: '#9aacb5' }}>{trip.subtitle}</span>
+          </>
         )}
       </div>
     </button>
