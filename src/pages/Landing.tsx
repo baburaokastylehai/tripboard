@@ -151,50 +151,17 @@ const Landing = () => {
             Create a Trip
           </button>
 
-          {!showLinkInput ? (
-            <button
-              type="button"
-              onClick={() => setShowLinkInput(true)}
-              className="w-full py-4 rounded-[14px] font-body text-[16px] font-semibold tap-scale"
-              style={{
-                backgroundColor: 'transparent',
-                color: '#1a3647',
-                border: '1.5px solid rgba(26,54,71,0.12)',
-              }}
-            >
-              I have a trip link
-            </button>
-          ) : (
-            <div
-              className="w-full flex gap-2 animate-fadeSlideIn"
-            >
-              <input
-                type="text"
-                placeholder="paste your trip link here..."
-                value={tripLink}
-                onChange={(e) => setTripLink(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGoToTrip()}
-                className="flex-1 px-4 py-[14px] rounded-xl font-body text-[15px] text-navy placeholder:text-text-muted outline-none transition-colors"
-                style={{
-                  border: '1.5px solid rgba(26,54,71,0.12)',
-                  backgroundColor: '#fff',
-                }}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={handleGoToTrip}
-                disabled={!tripLink.trim()}
-                className="px-5 py-[14px] rounded-xl font-body text-[14px] font-semibold tap-scale disabled:opacity-40"
-                style={{ backgroundColor: '#c17c4e', color: '#fff' }}
-              >
-                Go
-              </button>
-            </div>
-          )}
-          <p className="font-body text-[12px] text-text-muted text-center mt-1">
-            Or just open a shared trip link — it'll take you straight there.
+          <p className="font-body text-[13px] text-center" style={{ color: '#9aacb5' }}>
+            already have a trip link? just open it — you're in.
           </p>
+
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="font-body text-[13px] text-center tap-scale"
+            style={{ color: '#c17c4e', background: 'none', border: 'none' }}
+          >
+            how it works ↗
+          </button>
         </div>
 
         {/* My Trips */}
