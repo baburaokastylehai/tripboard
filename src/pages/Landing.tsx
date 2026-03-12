@@ -189,22 +189,21 @@ const Landing = () => {
                   <TripCard key={trip.slug} trip={trip} index={i} />
                 ))}
               </div>
-              <div style={{ height: '24px' }} />
             </>
           )}
 
-          {/* Trip counter — only show when count > 10 */}
-          {showCounter && tripCount > 10 && (
-            <p className="font-body text-[11px] text-center" style={{ color: '#5cbf8a' }}>
+          {/* Trip counter */}
+          {showCounter && (
+            <p className="font-body text-[11px] text-center" style={{ color: '#5cbf8a', marginTop: allTrips.length > 0 ? '24px' : '0px' }}>
               · {displayCount} trips created ·
             </p>
           )}
 
-          {/* Footer items */}
+          {/* Footer items — separated from trips */}
           <button
             onClick={() => setShowFeedback(true)}
             className="font-body text-[11px] tap-scale"
-            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: showCounter && tripCount > 10 ? '10px' : '0px' }}
+            style={{ color: '#c17c4e', background: 'none', border: 'none', letterSpacing: '0.5px', marginTop: showCounter ? '10px' : (allTrips.length > 0 ? '32px' : '0px') }}
           >
             the story behind this{' '}
             <span
