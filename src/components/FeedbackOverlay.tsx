@@ -106,12 +106,6 @@ const FeedbackOverlay = ({ tripSlug, onClose }: Props) => {
             </p>
           ) : (
             <>
-              {userName && (
-                <p className="font-body text-[13px] mb-3" style={{ color: '#c17c4e' }}>
-                  from {userName}
-                </p>
-              )}
-
               <textarea
                 ref={textareaRef}
                 rows={2}
