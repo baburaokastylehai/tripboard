@@ -125,8 +125,8 @@ const Landing = () => {
         <div className="text-center mb-10">
           <div className="text-[60px] leading-none mb-4 animate-gentle-float">🗺</div>
           <h1 className="font-display text-[34px] font-extrabold text-navy leading-tight">TripBoard</h1>
-          <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed">
-            group chats are for banter. trip links deserve better.
+          <p className="font-body text-[15px] text-text-muted mt-3 leading-relaxed whitespace-nowrap max-[400px]:text-[13px]">
+            group chats are for banter. trip links belong here.
           </p>
           {/* Trip counter */}
           {showCounter && (
