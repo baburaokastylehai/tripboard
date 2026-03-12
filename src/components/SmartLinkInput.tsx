@@ -192,7 +192,7 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
         ref={textareaRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="paste a link — or a few, we'll sort them out"
+        placeholder="paste a link - or a few, we'll sort them out"
         rows={1}
         className="w-full font-body text-[15px] text-navy placeholder:text-[#c8cfd3] outline-none resize-none"
         style={{
