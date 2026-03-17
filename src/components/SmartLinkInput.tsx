@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { supabase, TripItem, CATEGORIES } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -6,6 +6,11 @@ interface Props {
   tripId: string;
   onItemsAdded: (items: TripItem[]) => void;
   isOnline: boolean;
+  onBeforeSubmit?: () => boolean; // return false to prevent submit (e.g. needs name prompt)
+}
+
+export interface SmartLinkInputHandle {
+  submit: () => void;
 }
 
 const URL_REGEX = /https?:\/\/[^\s,]+|(?:www\.)?[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}[^\s,]*/g;
@@ -49,7 +54,7 @@ const extractUrls = (text: string): string[] => {
   });
 };
 
-const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
+const SmartLinkInput = forwardRef<SmartLinkInputHandle, Props>(({ tripId, onItemsAdded, isOnline, onBeforeSubmit }, ref) => {
   const [text, setText] = useState('');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +78,7 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
     }
   }, [error]);
 
-  const handleSubmit = async () => {
+  const doSubmit = async () => {
     if (!text.trim() || processing || !isOnline) return;
 
     const urls = extractUrls(text);
@@ -177,6 +182,19 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
     setProcessing(false);
   };
 
+  const handleSubmit = () => {
+    // If onBeforeSubmit is provided, check if we can proceed
+    if (onBeforeSubmit && !onBeforeSubmit()) {
+      return; // parent will handle (e.g. show name prompt, then call submit via ref)
+    }
+    doSubmit();
+  };
+
+  // Expose submit method so parent can trigger it after name prompt
+  useImperativeHandle(ref, () => ({
+    submit: doSubmit,
+  }));
+
   return (
     <div
       style={{
@@ -236,6 +254,8 @@ const SmartLinkInput = ({ tripId, onItemsAdded, isOnline }: Props) => {
       </div>
     </div>
   );
-};
+});
+
+SmartLinkInput.displayName = 'SmartLinkInput';
 
 export default SmartLinkInput;
