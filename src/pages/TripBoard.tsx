@@ -18,8 +18,6 @@ import SmartLinkInput from '@/components/SmartLinkInput';
 import SharePromptBanner from '@/components/SharePromptBanner';
 import NamePromptSheet from '@/components/NamePromptSheet';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import AnnouncementStrip from '@/components/AnnouncementStrip';
-
 // Twilio Sandbox number — replace with production number after validation
 const WHATSAPP_BOT_NUMBER = '+14155238886';
 
@@ -91,7 +89,6 @@ const TripBoard = () => {
   const [pendingSmartAdd, setPendingSmartAdd] = useState(false);
   const smartLinkRef = useRef<{ submit: () => void } | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const hasVisitedBeforeRef = useRef(false);
 
   const clearPollingInterval = useCallback(() => {
     if (pollingIntervalRef.current !== null) {
@@ -163,8 +160,6 @@ const TripBoard = () => {
         startPolling(tripData.id);
         try {
           const visited = JSON.parse(localStorage.getItem('tripboard-visited-trips') || '[]');
-          // Check if user visited this trip before (for announcement strip)
-          hasVisitedBeforeRef.current = visited.some((t: any) => t.id === tripData.id);
           const entry = { id: tripData.id, slug: tripData.slug, name: tripData.name, emoji: tripData.emoji, subtitle: tripData.subtitle };
           const idx = visited.findIndex((t: any) => t.id === tripData.id);
           if (idx >= 0) visited[idx] = entry; else visited.unshift(entry);
@@ -257,26 +252,11 @@ const TripBoard = () => {
     setAddingCategory(null);
     setAddingDate(null);
     trackEvent('item_added', { trip_id: trip?.id, category: item.category, type: item.type });
-
-    // Fire-and-forget: notify WhatsApp subscribers
-    if (trip) {
-      supabase.functions.invoke('whatsapp-notify-send', {
-        body: { trip_id: trip.id, item_title: item.title, item_category: item.category },
-      }).catch(() => {});
-    }
   };
 
   const handleSmartItemsAdded = (newItems: TripItem[]) => {
     setItems(prev => [...newItems, ...prev]);
     trackEvent('smart_links_added', { trip_id: trip?.id, count: newItems.length });
-
-    // Fire-and-forget: notify WhatsApp subscribers
-    if (trip && newItems.length > 0) {
-      const body = newItems.length === 1
-        ? { trip_id: trip.id, item_title: newItems[0].title, item_category: newItems[0].category }
-        : { trip_id: trip.id, item_title: `${newItems.length} new links`, item_category: newItems[0].category, count: newItems.length };
-      supabase.functions.invoke('whatsapp-notify-send', { body }).catch(() => {});
-    }
   };
 
   const hasUsername = () => !!localStorage.getItem('tripboard-username');
@@ -495,73 +475,47 @@ const TripBoard = () => {
             {trip.emoji}
           </div>
 
-          {/* Header pills (notify + share) */}
-          <div
-            className="absolute flex items-center gap-2"
+          {/* Share pill */}
+          <button
+            onClick={async () => {
+              trackEvent('share_opened', { trip_id: trip.id });
+              const shareUrl = `${window.location.origin}/t/${trip.slug}`;
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: trip.name || 'TripBoard',
+                    text: 'Join our trip on TripBoard',
+                    url: shareUrl,
+                  });
+                } catch (err) {
+                  if ((err as Error).name === 'AbortError') return;
+                }
+              } else {
+                try {
+                  await navigator.clipboard.writeText(shareUrl);
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                } catch {
+                  // Clipboard failed — show a toast with the URL so user can copy manually
+                  toast(shareUrl, { duration: 6000 });
+                }
+              }
+            }}
+            className="absolute font-body text-[13px] font-medium transition-transform"
             style={{
               top: 'calc(env(safe-area-inset-top, 0px) + 20px)',
               right: '20px',
+              color: '#fff',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              borderRadius: '20px',
+              padding: '8px 16px',
+              border: 'none',
+              transform: shareCopied ? 'scale(0.95)' : 'scale(1)',
+              transition: 'transform 0.2s ease',
             }}
           >
-            {/* Notify me pill */}
-            <a
-              href={`https://wa.me/${WHATSAPP_BOT_NUMBER.replace('+', '')}?text=${encodeURIComponent(`notify ${trip.slug}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-body text-[13px] font-medium"
-              style={{
-                color: '#c17c4e',
-                backgroundColor: 'rgba(193,124,78,0.12)',
-                borderRadius: '20px',
-                padding: '8px 14px',
-                border: 'none',
-                textDecoration: 'none',
-              }}
-              onClick={() => trackEvent('notify_me_tapped', { trip_id: trip.id })}
-            >
-              notify me
-            </a>
-
-            {/* Share pill */}
-            <button
-              onClick={async () => {
-                trackEvent('share_opened', { trip_id: trip.id });
-                const shareUrl = `${window.location.origin}/t/${trip.slug}`;
-                if (navigator.share) {
-                  try {
-                    await navigator.share({
-                      title: trip.name || 'TripBoard',
-                      text: 'Join our trip on TripBoard',
-                      url: shareUrl,
-                    });
-                  } catch (err) {
-                    if ((err as Error).name === 'AbortError') return;
-                  }
-                } else {
-                  try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    setShareCopied(true);
-                    setTimeout(() => setShareCopied(false), 2000);
-                  } catch {
-                    // Clipboard failed — show a toast with the URL so user can copy manually
-                    toast(shareUrl, { duration: 6000 });
-                  }
-                }
-              }}
-              className="font-body text-[13px] font-medium transition-transform"
-              style={{
-                color: '#fff',
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                borderRadius: '20px',
-                padding: '8px 16px',
-                border: 'none',
-                transform: shareCopied ? 'scale(0.95)' : 'scale(1)',
-                transition: 'transform 0.2s ease',
-              }}
-            >
-              {shareCopied ? 'copied ✓' : <>share <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span></>}
-            </button>
-          </div>
+            {shareCopied ? 'copied ✓' : <>share <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span></>}
+          </button>
 
           {/* Eyebrow: date range and/or subtitle */}
           {(hasDateRange || trip.subtitle) && (
@@ -619,9 +573,6 @@ const TripBoard = () => {
 
         {/* Offline banner */}
         <OfflineBanner isOnline={isOnline} />
-
-        {/* Announcement strip (only for returning visitors) */}
-        <AnnouncementStrip hasVisitedBefore={hasVisitedBeforeRef.current} />
 
         {/* Post-creation share prompt */}
         {isJustCreated && trip && (
