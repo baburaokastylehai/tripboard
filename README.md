@@ -1,73 +1,48 @@
-# Welcome to your Lovable project
+# tripboard
 
-## Project info
+group chats are for banter. trip links belong here.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**[tripboard.fortheplot.today](https://tripboard.fortheplot.today)**
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+your group's planning a trip. the chat's flying — hotel links, restaurant recs, "has anyone booked the flights yet?" you know how it goes.
 
-**Use Lovable**
+tripboard gives all of that a home. one person creates a trip, shares the link, and everyone drops their bookings, restaurant finds, and plans in one place. paste a url and it files itself — stay, getting there, things to do, eat & drink. mark what's booked, see what's still a maybe.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+that's kind of it.
 
-Changes made via Lovable will be committed automatically to this repo.
+## how it works
 
-**Use your preferred IDE**
+1. create a trip — name it, pick an emoji
+2. share the link with your crew
+3. drop links, notes, or files — tripboard sorts them into the right spot
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+no sign-ups. no accounts. no one has to download anything. open the link and you're in.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## what's under the hood
 
-Follow these steps:
+- react 18 + typescript + vite
+- supabase (postgres + edge functions + row-level security)
+- tailwind css + shadcn/ui
+- smart link sorting — domain lookup for ~50 travel sites, with an ai fallback for anything it doesn't recognize
+- pwa — installs to your home screen
+- no auth by design — the link is the access, names live in local storage
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## why no auth
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+the hardest part of planning a trip with friends isn't the planning — it's getting everyone to actually open the thing. every login screen is a place people bail. tripboard trades accounts for zero friction. a link nobody clicks is worse than a board with no password.
 
-# Step 3: Install the necessary dependencies.
-npm i
+## what it's not
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+not a spreadsheet. not a shared doc. not a general planning tool. it does one job — give your trip links a home that isn't a group chat — and doesn't try to be more than that.
 
-**Edit a file directly in GitHub**
+## the story
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+after working on a handful of ideas, this is the one that got closest to something real — not the most ambitious, just the one where the problem was annoying enough and the fix simple enough that it was worth finishing. built mostly with ai tools, kept honest about what it is: small, useful, and still evolving.
 
-**Use GitHub Codespaces**
+the story behind this ✦ [share your thoughts](https://tripboard.fortheplot.today)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+live at [tripboard.fortheplot.today](https://tripboard.fortheplot.today)
