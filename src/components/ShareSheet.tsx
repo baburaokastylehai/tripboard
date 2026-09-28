@@ -55,7 +55,7 @@ const ShareSheet = ({ slug, tripName, onClose }: Props) => {
           backgroundColor: '#faf7f2',
           borderRadius: '24px 24px 0 0',
           padding: '24px 20px 40px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
         }}
       >
         <div className="flex justify-center mb-5">
