@@ -1,5 +1,4 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import Landing from "./pages/Landing";
@@ -80,30 +79,26 @@ class ErrorBoundary extends Component<
   }
 }
 
-const queryClient = new QueryClient();
-
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/new" element={<CreateTrip />} />
-          <Route path="/t/:slug" element={<TripBoard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: {
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: '14px',
-            borderRadius: '12px',
-          },
-        }}
-      />
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/new" element={<CreateTrip />} />
+        <Route path="/t/:slug" element={<TripBoard />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+    <Toaster
+      position="top-center"
+      toastOptions={{
+        style: {
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: '14px',
+          borderRadius: '12px',
+        },
+      }}
+    />
   </ErrorBoundary>
 );
 

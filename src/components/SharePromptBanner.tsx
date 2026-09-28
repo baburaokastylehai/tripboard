@@ -2,12 +2,10 @@ import { useState } from 'react';
 
 interface Props {
   tripId: string;
-  slug: string;
-  tripName?: string;
   onShare: () => void;
 }
 
-const SharePromptBanner = ({ tripId, slug, tripName, onShare }: Props) => {
+const SharePromptBanner = ({ tripId, onShare }: Props) => {
   const storageKey = `tripboard-share-prompted-${tripId}`;
   const [dismissed, setDismissed] = useState(() => {
     return localStorage.getItem(storageKey) === 'true';
@@ -20,24 +18,8 @@ const SharePromptBanner = ({ tripId, slug, tripName, onShare }: Props) => {
     setDismissed(true);
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     localStorage.setItem(storageKey, 'true');
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: tripName || 'TripBoard',
-          text: 'Join our trip on TripBoard',
-          url: `${window.location.origin}/t/${slug}`,
-        });
-        setDismissed(true);
-        return;
-      } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
-      }
-    }
-
-    // Fallback: open share sheet
     onShare();
     setDismissed(true);
   };

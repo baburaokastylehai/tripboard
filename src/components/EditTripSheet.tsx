@@ -16,11 +16,13 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
   const [endDate, setEndDate] = useState(trip.end_date || '');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleSave = async () => {
     const trimmedName = name.trim();
     if (!trimmedName || saving) return;
     setSaving(true);
+    setSaveError(null);
 
     try {
       const { error } = await supabase
@@ -36,7 +38,7 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
 
       if (error) {
         console.error('Trip update failed:', error);
-        setSaving(false);
+        setSaveError("couldn't save those changes. try again in a moment.");
         return;
       }
 
@@ -55,6 +57,7 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
       onClose();
     } catch (err) {
       console.error('Trip update failed:', err);
+      setSaveError("couldn't save those changes. try again in a moment.");
     } finally {
       setSaving(false);
     }
@@ -152,6 +155,11 @@ const EditTripSheet = ({ trip, onClose, onUpdated }: Props) => {
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
+        {saveError && (
+          <p role="alert" className="font-body text-[12px] text-center mt-3" style={{ color: '#e57373' }}>
+            {saveError}
+          </p>
+        )}
       </div>
     </div>
   );

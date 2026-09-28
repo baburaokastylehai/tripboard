@@ -17,7 +17,7 @@ const OfflineBanner = ({ isOnline }: Props) => {
       const t = setTimeout(() => { setShow(false); setFading(false); }, 500);
       return () => clearTimeout(t);
     }
-  }, [isOnline]);
+  }, [isOnline, show]);
 
   if (!show) return null;
 

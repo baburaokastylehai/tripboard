@@ -5,7 +5,7 @@ export const useIsStandalone = () => {
 
   useEffect(() => {
     const mq = window.matchMedia('(display-mode: standalone)');
-    setIsStandalone(mq.matches || (navigator as any).standalone === true);
+    setIsStandalone(mq.matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
 
     const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches);
     mq.addEventListener('change', handler);

@@ -15,10 +15,12 @@ const CreateTrip = () => {
   const [endDate, setEndDate] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
+    setSubmitError(null);
 
     // Save creator name
     if (yourName.trim()) {
@@ -52,6 +54,8 @@ const CreateTrip = () => {
       navigate(`/t/${data.slug}`, { replace: true });
     } catch (err) {
       console.error('Failed to create trip:', err);
+      setSubmitError("we couldn't create your trip right now. try again in a moment.");
+    } finally {
       setSubmitting(false);
     }
   };
@@ -162,6 +166,11 @@ const CreateTrip = () => {
         >
           {submitting ? 'Creating...' : 'Create Trip'}
         </button>
+        {submitError && (
+          <p role="alert" className="font-body text-[13px] text-center mt-3" style={{ color: '#e57373' }}>
+            {submitError}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { supabase, TripItem } from '@/lib/supabase';
 
 interface CategoryDef {
@@ -33,22 +33,9 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [content, setContent] = useState('');
-  const [fileData, setFileData] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
   const [itemDate, setItemDate] = useState(prefilledDate || '');
   const [submitting, setSubmitting] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setFileData(ev.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // For links, URL is required; title is optional (auto-fills from domain)
   const canSubmitLink = type === 'link' && url.trim();
@@ -58,6 +45,7 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
+    setSubmitError(null);
 
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const addedByName = localStorage.getItem('tripboard-username') || 'Anonymous';
@@ -76,25 +64,29 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
       title: finalTitle,
       url: type === 'link' ? url.trim() : null,
       content: type === 'note' ? content.trim() : null,
-      file_data: type === 'file' ? fileData : null,
-      file_name: type === 'file' ? fileName : null,
+      file_data: null,
+      file_name: null,
       added_by_name: addedByName,
       created_at: createdAt,
       status: 'considering',
       item_date: itemDate || null,
     };
 
-    onItemAdded(newItem);
-
     const { error } = await supabase.from('trip_items').insert(newItem);
-    if (error) console.error('Insert failed:', error);
+    if (error) {
+      console.error('Insert failed:', error);
+      setSubmitError("couldn't save this one. your board hasn't changed — try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    onItemAdded(newItem);
     setSubmitting(false);
   };
 
   const types = [
     { id: 'link', emoji: '🔗', label: 'Link' },
     { id: 'note', emoji: '📝', label: 'Note' },
-    { id: 'file', emoji: '📎', label: 'File' },
   ];
 
   const inputStyle = {
@@ -194,7 +186,7 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
               </>
             )}
 
-            {/* NOTE & FILE: title first */}
+            {/* Notes: title first */}
             {type !== 'link' && (
               <input
                 type="text"
@@ -220,43 +212,6 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
                 onFocus={handleFocus}
                 onBlur={handleBlur}
               />
-            )}
-
-            {type === 'file' && (
-              <div className="mb-3">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                {!fileData ? (
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="w-full py-7 font-body text-[14px] font-medium text-copper active:opacity-70"
-                    style={{
-                      border: '2px dashed rgba(26,54,71,0.1)',
-                      borderRadius: '12px',
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    Tap to upload screenshot or file
-                  </button>
-                ) : (
-                  <div>
-                    <p className="font-body text-[13px] text-copper font-medium mb-2">✓ {fileName}</p>
-                    {fileData.startsWith('data:image') && (
-                      <img
-                        src={fileData}
-                        alt="preview"
-                        className="w-full object-cover"
-                        style={{ maxHeight: '180px', borderRadius: '12px' }}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
             )}
 
             {/* Date field */}
@@ -286,6 +241,11 @@ const AddItemSheet = ({ tripId, category, onClose, onItemAdded, tripStartDate, t
             >
               {submitting ? 'Adding...' : `Add to ${category.name}`}
             </button>
+            {submitError && (
+              <p role="alert" className="font-body text-[12px] text-center mt-3" style={{ color: '#e57373' }}>
+                {submitError}
+              </p>
+            )}
           </div>
         )}
       </div>

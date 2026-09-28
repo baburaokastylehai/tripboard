@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -8,10 +8,10 @@ const HowItWorksOverlay = ({ onClose }: Props) => {
   const [leaving, setLeaving] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setLeaving(true);
     setTimeout(onClose, 400);
-  };
+  }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
@@ -25,7 +25,7 @@ const HowItWorksOverlay = ({ onClose }: Props) => {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, []);
+  }, [handleClose]);
 
   return (
     <div

@@ -19,21 +19,6 @@ CREATE INDEX idx_whatsapp_subscribers_phone_hash ON whatsapp_subscribers (phone_
 -- Fast query for all active subscribers on a trip (used by notify-send)
 CREATE INDEX idx_whatsapp_subscribers_trip_active ON whatsapp_subscribers (trip_id) WHERE active = true;
 
--- RLS: open access (same pattern as other tables)
+-- RLS: access is restricted to trusted server-side clients using the service role.
+-- Phone identifiers must never be readable or writable through the public API.
 ALTER TABLE whatsapp_subscribers ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "whatsapp_subscribers_select"
-  ON whatsapp_subscribers FOR SELECT
-  USING (true);
-
-CREATE POLICY "whatsapp_subscribers_insert"
-  ON whatsapp_subscribers FOR INSERT
-  WITH CHECK (true);
-
-CREATE POLICY "whatsapp_subscribers_update"
-  ON whatsapp_subscribers FOR UPDATE
-  USING (true) WITH CHECK (true);
-
-CREATE POLICY "whatsapp_subscribers_delete"
-  ON whatsapp_subscribers FOR DELETE
-  USING (true);

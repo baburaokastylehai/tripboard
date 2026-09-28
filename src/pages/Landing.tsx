@@ -33,7 +33,9 @@ const Landing = () => {
       setMyTrips(myList);
       const myIds = new Set(myList.map((t: SavedTrip) => t.id));
       setRecentTrips(visitedList.filter((t: SavedTrip) => !myIds.has(t.id)));
-    } catch {}
+    } catch {
+      // Ignore malformed local history and show an empty trip list.
+    }
   };
 
   // Fetch trip count

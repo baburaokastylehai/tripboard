@@ -20,7 +20,7 @@ export const identifyUser = (name: string) => {
   posthog.identify(name, { display_name: name });
 };
 
-export const trackEvent = (event: string, properties?: Record<string, any>) => {
+export const trackEvent = (event: string, properties?: Record<string, unknown>) => {
   posthog.capture(event, properties);
 };
 

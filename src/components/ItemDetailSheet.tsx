@@ -34,6 +34,7 @@ const ItemDetailSheet = ({ item, onClose, onStatusChange, onDelete, onItemUpdate
   const [editContent, setEditContent] = useState(item.content || '');
   const [editDate, setEditDate] = useState(item.item_date || '');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const isBooked = item.status === 'booked';
 
@@ -49,6 +50,7 @@ const ItemDetailSheet = ({ item, onClose, onStatusChange, onDelete, onItemUpdate
   const handleSave = async () => {
     if (!editTitle.trim() || saving) return;
     setSaving(true);
+    setSaveError(null);
 
     const updates: Partial<TripItem> = {
       title: editTitle.trim(),
@@ -61,6 +63,9 @@ const ItemDetailSheet = ({ item, onClose, onStatusChange, onDelete, onItemUpdate
     if (!error) {
       onItemUpdated({ ...item, ...updates });
       setEditing(false);
+    } else {
+      console.error('Item update failed:', error);
+      setSaveError("couldn't save those changes. try again in a moment.");
     }
     setSaving(false);
   };
@@ -374,6 +379,11 @@ const ItemDetailSheet = ({ item, onClose, onStatusChange, onDelete, onItemUpdate
                   {saving ? 'saving...' : 'save'}
                 </button>
               </div>
+              {saveError && (
+                <p role="alert" className="font-body text-[12px] text-center mt-3" style={{ color: '#e57373' }}>
+                  {saveError}
+                </p>
+              )}
             </div>
           )}
         </div>

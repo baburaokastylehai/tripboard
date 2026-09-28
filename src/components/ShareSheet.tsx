@@ -8,14 +8,20 @@ interface Props {
 
 const ShareSheet = ({ slug, tripName, onClose }: Props) => {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const url = `${window.location.origin}/t/${slug}`;
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => {
-      onClose();
-    }, 400);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyError(false);
+      setCopied(true);
+      setTimeout(() => {
+        onClose();
+      }, 400);
+    } catch {
+      setCopyError(true);
+    }
   };
 
   const handleShare = async () => {
@@ -74,8 +80,13 @@ const ShareSheet = ({ slug, tripName, onClose }: Props) => {
         </button>
 
         <p className="font-body text-[13px] text-text-muted text-center mt-3">
-          Anyone with this link can add and see everything.
+          anyone with this link can view the board, add ideas, and edit or remove items.
         </p>
+        {copyError && (
+          <p role="alert" className="font-body text-[12px] text-center mt-2" style={{ color: '#e57373' }}>
+            couldn't copy the link. press and hold the link above to copy it.
+          </p>
+        )}
       </div>
     </div>
   );

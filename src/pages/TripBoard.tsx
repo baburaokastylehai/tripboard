@@ -53,6 +53,14 @@ const getDaysInRange = (start: string, end: string) => {
   return days;
 };
 
+interface SavedTripRecord {
+  id: string;
+  slug: string;
+  name: string;
+  emoji: string;
+  subtitle: string;
+}
+
 const TripBoard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -61,6 +69,8 @@ const TripBoard = () => {
   const [items, setItems] = useState<TripItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [itemsError, setItemsError] = useState(false);
   // Skip welcome if user already has a name
   const [showWelcome, setShowWelcome] = useState(() => {
     return !localStorage.getItem('tripboard-username');
@@ -74,7 +84,6 @@ const TripBoard = () => {
   const [addingCategory, setAddingCategory] = useState<string | null>(null);
   const [addingDate, setAddingDate] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const pollingIntervalRef = useRef<number | null>(null);
@@ -95,14 +104,6 @@ const TripBoard = () => {
     }
   }, []);
 
-  const isCreator = useCallback(() => {
-    if (!trip) return false;
-    try {
-      const saved = JSON.parse(localStorage.getItem('tripboard-my-trips') || '[]');
-      return saved.some((t: any) => t.id === trip.id);
-    } catch { return false; }
-  }, [trip]);
-
   const fetchTrip = useCallback(async () => {
     if (!slug) return;
     const { data, error } = await supabase
@@ -110,8 +111,14 @@ const TripBoard = () => {
       .select('*')
       .eq('slug', slug)
       .single();
-    if (error) console.error('Fetch trip failed:', error);
-    if (error || !data) { setNotFound(true); setLoading(false); return; }
+    if (error) {
+      console.error('Fetch trip failed:', error);
+      if (error.code === 'PGRST116') setNotFound(true);
+      else setLoadError(true);
+      setLoading(false);
+      return;
+    }
+    if (!data) { setNotFound(true); setLoading(false); return; }
     setTrip(data);
 
     // Check if just created
@@ -130,7 +137,12 @@ const TripBoard = () => {
       .select('*')
       .eq('trip_id', tripId)
       .order('created_at', { ascending: false });
-    if (error) console.error('Fetch items failed:', error);
+    if (error) {
+      console.error('Fetch items failed:', error);
+      setItemsError(true);
+      return;
+    }
+    setItemsError(false);
     if (data) {
       // Normalize legacy category IDs
       const normalized = data.map(item => ({
@@ -159,10 +171,12 @@ const TripBoard = () => {
         try {
           const visited = JSON.parse(localStorage.getItem('tripboard-visited-trips') || '[]');
           const entry = { id: tripData.id, slug: tripData.slug, name: tripData.name, emoji: tripData.emoji, subtitle: tripData.subtitle };
-          const idx = visited.findIndex((t: any) => t.id === tripData.id);
+          const idx = visited.findIndex((t: SavedTripRecord) => t.id === tripData.id);
           if (idx >= 0) visited[idx] = entry; else visited.unshift(entry);
           localStorage.setItem('tripboard-visited-trips', JSON.stringify(visited));
-        } catch {}
+        } catch {
+          // A malformed local trip list should not prevent the board from loading.
+        }
       }
       if (isMounted) setLoading(false);
     };
@@ -191,8 +205,14 @@ const TripBoard = () => {
   };
 
   const handleDeleteItem = async (itemId: string) => {
+    const deletedItem = items.find(i => i.id === itemId);
     setItems(prev => prev.filter(i => i.id !== itemId));
-    await supabase.from('trip_items').delete().eq('id', itemId);
+    const { error } = await supabase.from('trip_items').delete().eq('id', itemId);
+    if (error && deletedItem) {
+      console.error('Delete item failed:', error);
+      setItems(prev => prev.some(i => i.id === itemId) ? prev : [deletedItem, ...prev]);
+      toast.error("couldn't remove that item. it's still on the board.");
+    }
   };
 
   const handleStatusChange = async (itemId: string, newStatus: string) => {
@@ -222,6 +242,7 @@ const TripBoard = () => {
       setItems(prev => prev.map(item =>
         item.id === itemId ? { ...item, status: oldStatus } : item
       ));
+      toast.error("couldn't update that item. try again in a moment.");
     }
 
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -241,8 +262,14 @@ const TripBoard = () => {
 
   const handleClearAll = async () => {
     if (!trip) return;
+    const previousItems = items;
     setItems([]);
-    await supabase.from('trip_items').delete().eq('trip_id', trip.id);
+    const { error } = await supabase.from('trip_items').delete().eq('trip_id', trip.id);
+    if (error) {
+      console.error('Clear items failed:', error);
+      setItems(previousItems);
+      toast.error("couldn't clear the board. nothing was removed.");
+    }
   };
 
   const handleItemAdded = (item: TripItem) => {
@@ -308,12 +335,14 @@ const TripBoard = () => {
     setTrip(updated);
     try {
       const saved = JSON.parse(localStorage.getItem('tripboard-my-trips') || '[]');
-      const idx = saved.findIndex((t: any) => t.id === updated.id);
+      const idx = saved.findIndex((t: SavedTripRecord) => t.id === updated.id);
       if (idx >= 0) {
         saved[idx] = { id: updated.id, slug: updated.slug, name: updated.name, emoji: updated.emoji, subtitle: updated.subtitle };
         localStorage.setItem('tripboard-my-trips', JSON.stringify(saved));
       }
-    } catch {}
+    } catch {
+      // The board update succeeded even if the local shortcut cannot be refreshed.
+    }
   };
 
   // By Day view data
@@ -421,6 +450,21 @@ const TripBoard = () => {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
+        <div className="text-center px-5 max-w-[360px]">
+          <div className="text-[48px] mb-4">🗺</div>
+          <h1 className="font-display text-[22px] font-bold text-navy mb-2">the board isn't loading</h1>
+          <p className="font-body text-[14px] text-text-muted mb-6">your link may be fine. tripboard couldn't reach the board right now.</p>
+          <button onClick={() => window.location.reload()} className="font-body text-[14px] font-medium text-copper active:opacity-70">
+            try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (notFound || !trip) {
     return (
       <div className="min-h-screen flex items-center justify-center page-transition" style={{ backgroundColor: '#faf7f2' }}>
@@ -475,29 +519,9 @@ const TripBoard = () => {
 
           {/* Share pill */}
           <button
-            onClick={async () => {
+            onClick={() => {
               trackEvent('share_opened', { trip_id: trip.id });
-              const shareUrl = `${window.location.origin}/t/${trip.slug}`;
-              if (navigator.share) {
-                try {
-                  await navigator.share({
-                    title: trip.name || 'TripBoard',
-                    text: 'Join our trip on TripBoard',
-                    url: shareUrl,
-                  });
-                } catch (err) {
-                  if ((err as Error).name === 'AbortError') return;
-                }
-              } else {
-                try {
-                  await navigator.clipboard.writeText(shareUrl);
-                  setShareCopied(true);
-                  setTimeout(() => setShareCopied(false), 2000);
-                } catch {
-                  // Clipboard failed — show a toast with the URL so user can copy manually
-                  toast(shareUrl, { duration: 6000 });
-                }
-              }
+              setShowShare(true);
             }}
             className="absolute font-body text-[13px] font-medium transition-transform"
             style={{
@@ -508,11 +532,10 @@ const TripBoard = () => {
               borderRadius: '20px',
               padding: '8px 16px',
               border: 'none',
-              transform: shareCopied ? 'scale(0.95)' : 'scale(1)',
               transition: 'transform 0.2s ease',
             }}
           >
-            {shareCopied ? 'copied ✓' : <>share <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span></>}
+            share <span style={{display: 'inline-block', transform: 'rotate(-45deg)', fontSize: '0.85em'}}>→</span>
           </button>
 
           {/* Eyebrow: date range and/or subtitle */}
@@ -572,13 +595,17 @@ const TripBoard = () => {
         {/* Offline banner */}
         <OfflineBanner isOnline={isOnline} />
 
+        {itemsError && (
+          <div role="alert" className="font-body text-[13px] text-center mx-4 mt-4 px-4 py-3 rounded-xl" style={{ color: '#9a5b3d', backgroundColor: 'rgba(193,124,78,0.1)' }}>
+            some ideas may be missing. tripboard will keep trying to reconnect.
+          </div>
+        )}
+
         {/* Post-creation share prompt */}
         {isJustCreated && trip && (
           <div className="pt-4">
             <SharePromptBanner
               tripId={trip.id}
-              slug={trip.slug}
-              tripName={trip.name}
               onShare={() => setShowShare(true)}
             />
           </div>

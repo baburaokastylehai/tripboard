@@ -8,7 +8,7 @@ const InstallPrompt = () => {
     // Only on mobile
     if (window.innerWidth >= 768) return;
     // Not in standalone
-    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) return;
+    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone) return;
     // Already dismissed
     if (localStorage.getItem('tripboard-install-dismissed')) return;
     // Must have visited at least one trip

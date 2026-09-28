@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { trackEvent } from '@/lib/posthog';
 
@@ -17,10 +17,10 @@ const FeedbackOverlay = ({ tripSlug, onClose }: Props) => {
 
   const userName = localStorage.getItem('tripboard-username') || '';
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setLeaving(true);
     setTimeout(onClose, 400);
-  };
+  }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
@@ -63,7 +63,7 @@ const FeedbackOverlay = ({ tripSlug, onClose }: Props) => {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, []);
+  }, [handleClose]);
 
   return (
     <div

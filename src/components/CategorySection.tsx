@@ -113,6 +113,7 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
             {isEmpty ? (
               <button
                 onClick={onAddItem}
+                aria-label={`Add item to ${category.name}`}
                 className="flex-shrink-0 flex items-center justify-center text-copper tap-scale"
                 style={{
                   minWidth: '120px',
@@ -128,6 +129,7 @@ const CategorySection = ({ category, items, collapsed, onToggle, onAddItem, onSt
             ) : (
               <button
                 onClick={onAddItem}
+                aria-label={`Add item to ${category.name}`}
                 className="flex-shrink-0 flex flex-col items-center justify-center font-body text-[13px] font-medium text-copper tap-scale"
                 style={{
                   width: '148px',
